@@ -9,7 +9,7 @@ CA UIM perl object-oriented framework. This framework is used in 10+ probes for 
 use perluim::main;
 use perluim::log;
 
-my $Console = new bnpp::log("test_probe.log");
+my $Console = new perluim::log("test_probe.log");
 my $ScriptExecutionTime = time();
 $Console->print("Execution start at ".localtime(),5);
 $Console->setLevel(3);
