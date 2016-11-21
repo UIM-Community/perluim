@@ -3,6 +3,8 @@ CA UIM perl object-oriented framework. This framework is used in 10+ probes for 
 
 > Warning : Think to update librairies path in each .pm file.
 
+**!!A big cleanup of all framework methods is in progress.!!**
+
 # Introduction 
 
 ```perl
