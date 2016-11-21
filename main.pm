@@ -83,10 +83,10 @@ sub getLocalRobot {
 
 sub getAllRobots {
     my ($self) = @_;
-    my @LIST_HUB        = $self->Get_ArrayHUBS();
+    my @LIST_HUB        = $self->getArrayHubs();
     my %LIST_ROBOTS     = ();
     foreach my $hub (@LIST_HUB) {
-        my @ROBOTS = $hub->GET_ArrayRobots();
+        my @ROBOTS = $hub->getArrayRobots();
         foreach my $robot (@ROBOTS) {
             $LIST_ROBOTS{lc $robot->{name}} = $robot;
         }
