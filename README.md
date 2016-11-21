@@ -22,6 +22,32 @@ my $Execution_Date = $SDK->getDate();
 $SDK->createDirectory("output/$Execution_Date");
 ```
 
+### Get robots or hubs 
+```perl
+my @Hubs = $SDK->getArrayHubs();
+foreach my $hub (@Hubs) {
+    # Hub is perluim:hub class
+    my @Robots $hub->getArrayRobots();
+}
+
+# Or if you need directly all robots 
+my %Robots = $SDK->getAllRobots(); # Key = robotname, value = class robot
+```
+
+### Get archive from hubs 
+```perl
+my @Hubs = $SDK->getArrayHubs();
+foreach my $hub (@Hubs) {
+    # Hub is perluim:hub class
+    my ($RC,@Packages) = $hub->getArchivePackages();
+    if($RC) {
+        # Exploit packages class here!
+        # Delete package ?
+        my $rc_deleted = $hub->deletePackage('name','version');
+    }
+}
+```
+
 # Contribution welcome 
 
 - Better UMP class (to do action on the REST API, and switch UMP if needed). 
