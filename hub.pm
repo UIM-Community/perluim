@@ -11,11 +11,9 @@ use Nimbus::API;
 use Nimbus::PDS;
 use Nimbus::CFG;
 
-# Bnpp packages
+# perluim packages
 use perluim::robot;
-
-use Data::Dumper;
-$Data::Dumper::Indent = 1;
+use perluim::package;
 
 sub new {
     my ($class,$o) = @_;
@@ -49,10 +47,7 @@ sub new {
     return bless($this,ref($class) || $class);
 }
 
-#
-# => Remove robot from the HUB !
-#
-sub RemoveRobot {
+sub removeRobot {
 	my ($self,$robotName) = @_;
 	my $PDS = pdsCreate();
 	pdsPut_PCH ($PDS,"name",$robotName);
@@ -63,7 +58,7 @@ sub RemoveRobot {
     return $RC;
 }
 
-sub Get_Robot {
+sub getRobots {
     my ($self,$robotname) = @_;
     my $PDS = pdsCreate();
     pdsPut_PCH($PDS,"name","$robotname");
@@ -74,7 +69,6 @@ sub Get_Robot {
         return Nimbus::PDS->new($NMS_RES);
     }
     else {
-        print "get robot failed!\n";
         return 0;
     }
 }
@@ -82,7 +76,7 @@ sub Get_Robot {
 #
 # => Get an Array of robots in the instanciate HUB!
 #
-sub GET_ArrayRobots {
+sub getArrayRobots {
     my ($self) = @_;
     my $PDS = pdsCreate();
     my ($RC,$NMS_RES) = nimNamedRequest("$self->{addr}","getrobots",$PDS,10);
@@ -92,7 +86,7 @@ sub GET_ArrayRobots {
     if($RC == NIME_OK) {
         my $ROBOTS_PDS = Nimbus::PDS->new($NMS_RES);
         for( my $count = 0; my $ROBOTNFO = $ROBOTS_PDS->getTable("robotlist",PDS_PDS,$count); $count++) {
-            my $ROBOT = new bnpp::robot($ROBOTNFO);
+            my $ROBOT = new perluim::robot($ROBOTNFO);
             push(@RobotsList,$ROBOT);
         }
     }
@@ -102,7 +96,7 @@ sub GET_ArrayRobots {
 #
 # => Get an Hash of robots in the instanciate HUB!
 #
-sub GET_HashRobots {
+sub getHashRobots {
     my ($self) = @_;
     my $PDS = pdsCreate();
     my ($RC,$NMS_RES) = nimNamedRequest("$self->{addr}","getrobots",$PDS,10);
@@ -112,7 +106,7 @@ sub GET_HashRobots {
         my $ROBOTS_PDS = Nimbus::PDS->new($NMS_RES);
         my %RobotsList = ();
         for( my $count = 0; my $ROBOTNFO = $ROBOTS_PDS->getTable("robotlist",PDS_PDS,$count); $count++) {
-            my $ROBOT = new bnpp::robot($ROBOTNFO);
+            my $ROBOT = new perluim::robot($ROBOTNFO);
             $RobotsList{$ROBOT->{name}} = $ROBOT;
         }
         return %RobotsList;
@@ -120,6 +114,74 @@ sub GET_HashRobots {
     else {
         return $RC;
     }
+}
+
+#
+# => Get Archive information
+#
+sub getArchive {
+    my ($self,$name,$version) = @_;
+    my $PDS = pdsCreate();
+    my $clean_addr = substr($self->{addr},0,-4);
+    my ($RC,$NMS_RES) = nimNamedRequest("$clean_addr/automated_deployment_engine","archive_list",$PDS,10);
+    pdsDelete($PDS);
+
+    my %PackagesList = ();
+    if($RC == NIME_OK) {
+        my $PKG_PDS = Nimbus::PDS->new($NMS_RES);
+        for( my $count = 0; my $PKG_INFO = $PKG_PDS->getTable("entry",PDS_PDS,$count); $count++) {
+            my $PKG = new perluim::package($PKG_INFO);
+            if(defined($PKG->{version}) && $PKG->{version} ne "") {
+                $PackagesList{"$PKG->{name}_$PKG->{version}_$PKG->{build}"} = $PKG;
+            }
+            else {
+                $PKG->setValid(0);
+                $PackagesList{"$PKG->{name}_NV"} = $PKG;
+            }
+        }
+        return 1,%PackagesList;
+    }
+    else {
+        return 0,%PackagesList;
+    }
+}
+
+sub ade_addPackageSyncRule {
+    my ($self,$pkg) = @_;
+
+    my $PDS = pdsCreate();
+    pdsPut_PCH ($PDS,"name",$pkg->{name});
+    pdsPut_PCH ($PDS,"rule_type","ALL");
+    my $clean_addr = substr($self->{addr},0,-4);
+    my ($RC,$NMS_RES) = nimNamedRequest("$clean_addr/automated_deployment_engine","add_package_sync_rule",$PDS,10);
+    pdsDelete($PDS);
+    return $RC;
+}
+
+sub deletePackage {
+    my ($self,$name,$version) = @_;
+
+    my $PDS = pdsCreate();
+    my $clean_addr = substr($self->{addr},0,-4);
+    pdsPut_PCH($PDS,"name","$name");
+    pdsPut_PCH($PDS,"version","$version");
+    my ($RC,$NMS_RES) = nimNamedRequest("$clean_addr/automated_deployment_engine","archive_delete",$PDS,10);
+    pdsDelete($PDS);
+
+    if($RC == NIME_OK) {
+        return 1;
+    }
+    return 0;
+}
+
+sub probeVerify {
+    my ($self,$probeName) = @_;
+    my $PDS = pdsCreate();
+    pdsPut_PCH($PDS,"name","automated_deployment_engine");
+    my $FilterADDR = substr($self->{addr},0,-4);
+    my ($RC,$NMS_RES) = nimNamedRequest("$FilterADDR/controller","probe_verify",$PDS,10);
+    pdsDelete($PDS);
+    return $RC;
 }
 
 1;
