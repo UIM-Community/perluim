@@ -210,9 +210,9 @@ sub getArrayProbes {
             my $Iprobe = new perluim::probe($ProbeName,$ProbeCFG,$self->{addr});
             push(@ProbesArray,$Iprobe);
         }
-        return @ProbesArray;
+        return $RC,@ProbesArray;
     }
-    return $RC;
+    return $RC,undef;
 }
 
 sub getLocalArrayProbes {
@@ -234,11 +234,6 @@ sub getLocalArrayProbes {
         $REQUEST_RC = 1;
     }
     return ($REQUEST_RC,@ProbesArray);
-}
-
-sub probeExist {
-    my ($self,$probeName) = @_;
-    # Check controller (probe_list);
 }
 
 sub probeRestart {
