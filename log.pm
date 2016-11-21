@@ -2,6 +2,8 @@ package perluim::log;
 use strict;
 use warnings;
 use File::Copy;
+use File::Stat;
+use File::Path 'rmtree';
 
 our %WarnState = (
 	0 => "[CRITICAL]",
@@ -53,6 +55,24 @@ sub print {
 		my $filehandler = $self->{fh};
 		print $filehandler "$date $WarnState{$loglevel} - $logmsg\n";
 		print "$date $WarnState{$loglevel} - $logmsg\n";
+	}
+}
+
+sub cleanDirectory {
+	my ($self,$directory,$maxAge) = @_;
+
+	opendir(DIR,"$directory");
+	my @directory = readdir(DIR);
+	my @removeDirectory = ();
+	foreach my $file (@directory) {
+		next if ($file =~ m/^\./);
+		my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat("$directory/$file");
+		push(@removeDirectory,$file) if(time() - $ctime > $maxAge);
+	}
+
+	foreach(@removeDirectory) {
+		$self->print("Remove old directory $directory => $_",2);
+		rmtree("$directory/$_");
 	}
 }
 
