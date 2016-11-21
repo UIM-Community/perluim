@@ -19,7 +19,6 @@ use Data::Dumper;
 use HTTP::Request;
 use LWP::UserAgent;
 use XML::Simple;
-use File::Path 'rmtree';
 $Data::Dumper::Indent = 1;
 
 sub new {
@@ -76,7 +75,6 @@ sub getLocalRobot {
         return new perluim::robot($PDS);
     }
     else {
-        print "GET INFO for Robot $self->{name} failed with RC $RC\n";
         return 0;
     }
 }
@@ -110,7 +108,6 @@ sub getLocalHub {
         return new perluim::hub($PDS);
     }
     else {
-        print "GET INFO for hub $self->{name} failed with RC $RC\n";
         return 0;
     }
 }
