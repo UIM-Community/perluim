@@ -34,7 +34,7 @@ foreach my $hub (@Hubs) {
 my %Robots = $SDK->getAllRobots(); # Key = robotname, value = class robot
 ```
 
-### Get archive from hubs 
+### Get archive packages from hubs 
 ```perl
 my @Hubs = $SDK->getArrayHubs();
 foreach my $hub (@Hubs) {
