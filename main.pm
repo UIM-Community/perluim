@@ -27,7 +27,6 @@ sub new {
     my $this = {
         domain => $domain,
         probeName => $probeName,
-        debug => $debug,
         user => undef,
         password => undef,
         console => undef
@@ -79,17 +78,6 @@ sub getLocalRobot {
     else {
         print "GET INFO for Robot $self->{name} failed with RC $RC\n";
         return 0;
-    }
-}
-
-sub getInput {
-    my $input;
-    while(<>) {
-        s/\s*$//;
-        $input = $_;
-        if(defined $input && $input ne "") {
-            return $input;
-        }
     }
 }
 
