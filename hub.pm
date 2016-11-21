@@ -66,10 +66,10 @@ sub getRobots {
     pdsDelete($PDS);
 
     if($RC == NIME_OK) {
-        return Nimbus::PDS->new($NMS_RES);
+        return $RC,Nimbus::PDS->new($NMS_RES);
     }
     else {
-        return 0;
+        return $RC,undef;
     }
 }
 
@@ -109,10 +109,10 @@ sub getHashRobots {
             my $ROBOT = new perluim::robot($ROBOTNFO);
             $RobotsList{$ROBOT->{name}} = $ROBOT;
         }
-        return %RobotsList;
+        return $RC,%RobotsList;
     }
     else {
-        return $RC;
+        return $RC,undef;
     }
 }
 
@@ -139,10 +139,10 @@ sub getArchivePackages {
                 $PackagesList{"$PKG->{name}_NV"} = $PKG;
             }
         }
-        return 1,%PackagesList;
+        return $RC,%PackagesList;
     }
     else {
-        return 0,%PackagesList;
+        return $RC,%PackagesList;
     }
 }
 
@@ -168,10 +168,7 @@ sub deletePackage {
     my ($RC,$NMS_RES) = nimNamedRequest("$clean_addr/automated_deployment_engine","archive_delete",$PDS,10);
     pdsDelete($PDS);
 
-    if($RC == NIME_OK) {
-        return 1;
-    }
-    return 0;
+    return $RC;
 }
 
 sub probeVerify {
