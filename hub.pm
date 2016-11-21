@@ -119,7 +119,7 @@ sub getHashRobots {
 #
 # => Get Archive information
 #
-sub getArchive {
+sub getArchivePackages {
     my ($self,$name,$version) = @_;
     my $PDS = pdsCreate();
     my $clean_addr = substr($self->{addr},0,-4);
