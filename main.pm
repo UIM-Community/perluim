@@ -72,10 +72,10 @@ sub getLocalRobot {
         foreach my $key (keys $RobotNFO) {
             $PDS->put($key,$RobotNFO->{$key},PDS_PCH);
         }
-        return new perluim::robot($PDS);
+        return $RC,new perluim::robot($PDS);
     }
     else {
-        return 0;
+        return $RC,undef;
     }
 }
 
@@ -105,10 +105,10 @@ sub getLocalHub {
         foreach my $key (keys $RobotNFO) {
             $PDS->put($key,$RobotNFO->{$key},PDS_PCH);
         }
-        return new perluim::hub($PDS);
+        return $RC,new perluim::hub($PDS);
     }
     else {
-        return 0;
+        return $RC,undef;
     }
 }
 
