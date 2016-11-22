@@ -209,6 +209,21 @@ sub getLocalArrayProbes {
     return $RC,@ProbesArray;
 }
 
+sub probeExist {
+    my ($self,$probeName) = @_;
+
+    my $PDS = pdsCreate();
+	pdsPut_PCH($PDS,"name",$probeName);
+	my ($RC,$RES) = nimNamedRequest( "$self->{addr}/controller", "probe_list",$PDS,5);
+    pdsDelete($PDS);
+
+    if($RC == NIME_OK) {
+        my $Hash = Nimbus::PDS->new($RES)->asHash();
+        return $RC,$Hash->{"$probeName"};
+    }
+    return $RC,undef;
+}
+
 sub probeRestart {
     my ($self,$probeName) = @_;
 	my $RC = nimNamedRequest( "$self->{addr}/$probeName", "_restart");
