@@ -14,6 +14,7 @@ use Nimbus::CFG;
 # perluim packages
 use perluim::robot;
 use perluim::package;
+use perluim::probe;
 
 sub new {
     my ($class,$o) = @_;
@@ -90,7 +91,7 @@ sub getArrayRobots {
             push(@RobotsList,$ROBOT);
         }
     }
-    return @RobotsList;
+    return $RC,@RobotsList;
 }
 
 #
@@ -223,7 +224,17 @@ sub probeList {
     my $FilterADDR = substr($self->{addr},0,-4);
     my ($RC,$NMS_RES) = nimNamedRequest("$FilterADDR/controller","probe_list",$PDS,10);
     pdsDelete($PDS);
-    return $RC,Nimbus::PDS->new($NMS_RES)->asHash();
+
+    if($RC == NIME_OK) {
+        my $Hash = Nimbus::PDS->new($NMS_RES)->asHash();
+        my @Probes;
+        foreach my $probe (keys %{$Hash}) {
+            my $Iprobe = new perluim::probe($probe,$Hash,$self->{addr});
+            push(@Probes,$Iprobe);
+        }
+        return $RC,@Probes
+    }
+    return $RC,undef;
 }
 
 1;
