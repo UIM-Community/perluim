@@ -59,8 +59,7 @@ if($RC == NIME_OK) {
 
 # Contribution welcome 
 
-- Better UMP class (to do action on the REST API, and switch UMP if needed). 
-- Update code syntax / algorithm.
+- Better UMP class (to do action on the REST API, and switch UMP if needed, HTTP request etc..). 
 - Add event system to each class (like event Emitter). 
 - Rework getCfg from probe.pm
 - Add new feature to probe.pm (like searching a key/section into a pds file).
@@ -70,6 +69,8 @@ if($RC == NIME_OK) {
 
 # Roadmap 
 
-- Rework better log.pm class
-- Work on the documentation.
+- Continue to work on documentation.
+- Add probeExist to robot API.
+- Add getCfg(probeName,path) to robot API.
+- Add getLog(probeName,path) to robot API.
 - Rework main class (better instanciating/configuration syntax).
