@@ -3,8 +3,6 @@ CA UIM perl object-oriented framework. This framework is used in 10+ probes for 
 
 > Warning : Think to update librairies path in each .pm file.
 
-**!!A big cleanup of all framework methods is in progress.!!**
-
 # Introduction 
 
 ```perl
@@ -67,7 +65,6 @@ if($RC == NIME_OK) {
 # Contribution welcome 
 
 - Better UMP class (to do action on the REST API, and switch UMP if needed, HTTP request etc..). 
-- Rework probe.pm (Add more callback / features).
 - Support for daemon probe (not really supported by main right now...)
 
 > Feel free to pull-request a new class etc...
@@ -75,6 +72,4 @@ if($RC == NIME_OK) {
 # Roadmap 
 
 - Continue to work on documentation.
-- Add getCfg(probeName,path) to robot API.
-- Add getLog(probeName,path) to robot API.
 - Rework main class (better instanciating/configuration syntax).
