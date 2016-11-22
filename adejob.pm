@@ -35,9 +35,8 @@ sub getTask {
         my $JobPDS = Nimbus::PDS->new($OBJ);
         my $JobHash = $JobPDS->getTable("Tasks",PDS_PDS,0);
         $self->{taskid} = $JobHash->get("TaskId");
-        return 1;
     }
-    return 0;
+    return $RC;
 }
 
 sub check {
@@ -52,9 +51,8 @@ sub check {
         $self->{status} = $JOBHash->{Status} || "N.A";
         $self->{description} = $JOBHash->{Description} || "";
         $self->{error} = $JOBHash->{Error} || "";
-        return 1;
     }
-    return 0;
+    return $RC;
 }
 
 sub cancel {
@@ -63,10 +61,7 @@ sub cancel {
     pdsPut_PCH($PDS,"JobID","$self->{id}");
     my ($RC,$OBJ) = nimNamedRequest("$self->{addr}","remove_job",$PDS,10);
     pdsDelete($PDS);
-    if($RC == NIME_OK) {
-        return 1;
-    }
-    return 0;
+    return $RC;
 }
 
 1;
