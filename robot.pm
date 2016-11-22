@@ -183,6 +183,7 @@ sub getArrayProbes {
         my $ProbeCFG = Nimbus::PDS->new($NMS_RES)->asHash();
         foreach my $ProbeName (keys $ProbeCFG) {
             my $Iprobe = new perluim::probe($ProbeName,$ProbeCFG,$self->{addr});
+	    $Iprobe->{robotname} = $self->{name};
             push(@ProbesArray,$Iprobe);
         }
         return $RC,@ProbesArray;
