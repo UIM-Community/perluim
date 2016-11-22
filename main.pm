@@ -221,9 +221,10 @@ sub getLocalArrayRobots {
     my $maxRetry = defined($retry) ? $retry : 1;
     my @RobotsList = ();
 
+    my ($RC,$NMS_RES);
     while($maxRetry--) {
         my $PDS = pdsCreate();
-        my ($RC,$NMS_RES) = nimNamedRequest("hub","getrobots",$PDS,10);
+        ($RC,$NMS_RES) = nimNamedRequest("hub","getrobots",$PDS,10);
         pdsDelete($PDS);
         if($RC == NIME_OK) {
             my $ROBOTS_PDS = Nimbus::PDS->new($NMS_RES);
