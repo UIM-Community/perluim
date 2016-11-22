@@ -125,10 +125,10 @@ sub getArrayHubs {
             my $HUB = new perluim::hub($HUBNFO);
             push(@Hubslist,$HUB);
         }
-        return @Hubslist;
+        return $RC,@Hubslist;
     }
     else {
-        return $RC;
+        return $RC,undef;
     }
 }
 
@@ -145,10 +145,10 @@ sub getHashHubs {
             my $HUB = new perluim::hub($HUBNFO);
             $Hubslist{$HUB->{name}} = $HUB;
         }
-        return %Hubslist;
+        return $RC,%Hubslist;
     }
     else {
-        return $RC;
+        return $RC,undef;
     }
 }
 
@@ -188,10 +188,10 @@ sub getHashRobots {
             my $ROBOT = new perluim::robot($ROBOTNFO);
             $RobotsList{$ROBOT->{name}} = $ROBOT;
         }
-        return %RobotsList;
+        return $RC,%RobotsList;
     }
     else {
-        return $RC;
+        return $RC,undef;
     }
 }
 
@@ -209,10 +209,10 @@ sub getArrayRobots {
             my $ROBOT = new perluim::robot($ROBOTNFO);
             push(@RobotsList,$ROBOT);
         }
-        return @RobotsList;
+        return $RC,@RobotsList;
     }
     else {
-        return $RC;
+        return $RC,undef;
     }
 }
 
