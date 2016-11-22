@@ -70,11 +70,8 @@ sub getInfo {
         $self->{workdir}        = $RobotNFO->{workdir};
         $self->{log_level}      = $RobotNFO->{log_level};
         $self->{source}         = $RobotNFO->{source};
-        return 1;
     }
-    else {
-        return 0;
-    }
+    return $RC;
 }
 
 sub getLocalInfo {
@@ -95,23 +92,8 @@ sub getLocalInfo {
         $self->{workdir}        = $RobotNFO->{workdir};
         $self->{log_level}      = $RobotNFO->{log_level};
         $self->{source}         = $RobotNFO->{source};
-        return 1;
     }
-    else {
-        return 0;
-    }
-}
-
-sub dump {
-    my ($self) = @_;
-    my $str = "";
-    $str.= "Robot : $self->{name} = {\n";
-    $str.= "\t Ip : $self->{ip}\n";
-    $str.= "\t OS_Major : $self->{os_major}\n";
-    $str.= "\t OS_Minor : $self->{os_minor}\n";
-    $str.= "\t Origin : $self->{origin}\n";
-    $str.= "\t Hubname : $self->{hubname}\n";
-    $str.= "}\n";
+    return $RC;
 }
 
 sub getLocalHub {
@@ -133,11 +115,8 @@ sub getLocalHub {
         $self->{shub_ip}            = $RobotNFO->{shub_ip} || "";
         $self->{shub_dns_name}      = $RobotNFO->{shub_dns_name} || $RobotNFO->{shub_name} || "";
         $self->{shub_port}          = $RobotNFO->{shub_port} || 48002;
-        return 1;
     }
-    else {
-        return 0;
-    }
+    return $RC;
 }
 
 sub getHub {
@@ -149,11 +128,9 @@ sub getHub {
 
     if($RC == NIME_OK) {
         my $RobotNFO = Nimbus::PDS->new($NMS_RES)->asHash();
-        return 1;
+        return $RC,$RobotNFO;
     }
-    else {
-        return 0;
-    }
+    return $RC,undef;
 }
 
 sub getPackages {
@@ -171,7 +148,7 @@ sub getPackages {
             push(@PackagesList,$Package);
         }
     }
-    return @PackagesList;
+    return $RC,@PackagesList;
 }
 
 sub getLocalPackages {
@@ -182,7 +159,6 @@ sub getLocalPackages {
     pdsDelete($PDS);
 
     my @PackagesList = ();
-    my $RC_REQUEST = 0;
     if($RC == NIME_OK) {
         my $PACKAGE_PDS = Nimbus::PDS->new($NMS_RES);
         for( my $count = 0; my $PACKAGENFO = $PACKAGE_PDS->getTable("pkg",PDS_PDS,$count); $count++) {
@@ -191,9 +167,8 @@ sub getLocalPackages {
                 push(@PackagesList,$Package);
             }
         }
-        $RC_REQUEST = 1;
     }
-    return ($RC_REQUEST,@PackagesList);
+    return $RC,@PackagesList;
 }
 
 sub getArrayProbes {
@@ -223,7 +198,6 @@ sub getLocalArrayProbes {
     my ($RC,$NMS_RES) = nimRequest("$self->{name}",48000,"probe_list",$PDS,1);
     pdsDelete($PDS);
 
-    my $REQUEST_RC = 0;
     if($RC == NIME_OK) {
         my $ProbeCFG = Nimbus::PDS->new($NMS_RES)->asHash();
         foreach my $ProbeName (keys $ProbeCFG) {
@@ -231,9 +205,8 @@ sub getLocalArrayProbes {
             $Iprobe->{robotname} = $self->{name};
             push(@ProbesArray,$Iprobe);
         }
-        $REQUEST_RC = 1;
     }
-    return ($REQUEST_RC,@ProbesArray);
+    return $RC,@ProbesArray;
 }
 
 sub probeRestart {
