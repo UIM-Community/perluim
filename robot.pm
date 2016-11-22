@@ -209,6 +209,72 @@ sub getLocalArrayProbes {
     return $RC,@ProbesArray;
 }
 
+sub getRobotCFG {
+    my ($self,$filepath) = @_;
+
+    my $PDS_args = pdsCreate();
+    pdsPut_PCH ($PDS_args,"directory","robot");
+    pdsPut_PCH ($PDS_args,"file","robot.cfg");
+    pdsPut_INT ($PDS_args,"buffer_size",10000000);
+
+    my ($RC, $ProbePDS_CFG) = nimNamedRequest("$self->{addr}/controller", "text_file_get", $PDS_args,3);
+    pdsDelete($PDS_args);
+
+    if($RC == NIME_OK) {
+        my $CFG_Handler;
+        unless(open($CFG_Handler,">","$filepath/robot_$self->{name}_.cfg")) {
+            warn "\nUnable to create configuration file for robot probe on path $filepath\n";
+            return 1;
+        }
+        my @ARR_CFG_Config = Nimbus::PDS->new($ProbePDS_CFG)->asHash();
+        print $CFG_Handler $ARR_CFG_Config[0]{'file_content'};
+        close $CFG_Handler;
+        return $RC;
+    }
+    return $RC;
+}
+
+sub probeConfig_set {
+    my ($self,$probeName,$section,$key,$value) = @_;
+
+    my $PDS_args = pdsCreate();
+    pdsPut_PCH ($PDS_args,"name","$probeName");
+    pdsPut_PCH ($PDS_args,"section","$section");
+    pdsPut_PCH ($PDS_args,"key","$key");
+    pdsPut_PCH ($PDS_args,"value","$value");
+    pdsPut_PCH ($PDS_args,"robot","1");
+
+    my ($RC, $O) = nimNamedRequest("$self->{addr}/controller", "probe_config_set", $PDS_args,3);
+    pdsDelete($PDS_args);
+
+    return $RC;
+}
+
+sub probeConfig_get {
+    my ($self,$probeName,$var) = @_;
+
+    my $PDS_args = pdsCreate();
+    pdsPut_PCH ($PDS_args,"name","$probeName");
+    if(defined($var)) {
+        pdsPut_PCH ($PDS_args,"var","$var");
+    }
+
+    my ($RC, $RES) = nimNamedRequest("$self->{addr}/controller", "probe_config_get", $PDS_args,3);
+    pdsDelete($PDS_args);
+
+    if($RC == NIME_OK) {
+        if(defined($var)) {
+            my $value = (Nimbus::PDS->new($RES))->get("value");
+            return $RC,$value;
+        }
+        else {
+            my $Hash = Nimbus::PDS->new($RES)->asHash();
+            return $RC,$Hash;
+        }
+    }
+    return $RC,undef;
+}
+
 sub probeExist {
     my ($self,$probeName) = @_;
 
@@ -237,6 +303,7 @@ sub probeDeactivate {
 	pdsPut_PCH($PDS,"name",$probeName);
 	pdsPut_INT($PDS,"noforce",1);
 	my ($RC,$OBJ) = nimNamedRequest( "$self->{addr}/controller", "probe_deactivate",$PDS,5);
+    pdsDelete($PDS);
 
 	return $RC;
 }
@@ -247,6 +314,7 @@ sub probeActivate {
 	my $PDS = pdsCreate();
 	pdsPut_PCH($PDS,"name",$probeName);
 	my ($RC,$OBJ) = nimNamedRequest( "$self->{addr}/controller", "probe_activate",$PDS,5);
+    pdsDelete($PDS);
 
 	return $RC;
 }
