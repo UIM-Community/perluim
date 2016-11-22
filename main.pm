@@ -237,7 +237,7 @@ sub getLocalArrayRobots {
             $self->doSleep(2);
         }
     }
-    return @RobotsList;
+    return $RC,@RobotsList;
 }
 
 sub doSleep {
