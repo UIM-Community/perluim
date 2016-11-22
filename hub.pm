@@ -214,4 +214,16 @@ sub probeVerify {
     return $RC;
 }
 
+sub probeList {
+    my ($self,$probeName) = @_;
+    my $PDS = pdsCreate();
+    if(defined($probeName)) {
+        pdsPut_PCH($PDS,"name","$probeName");
+    }
+    my $FilterADDR = substr($self->{addr},0,-4);
+    my ($RC,$NMS_RES) = nimNamedRequest("$FilterADDR/controller","probe_list",$PDS,10);
+    pdsDelete($PDS);
+    return $RC,Nimbus::PDS->new($NMS_RES)->asHash();
+}
+
 1;
