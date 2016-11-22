@@ -1,105 +1,183 @@
 use strict;
 use warnings;
+package perluim::main;
 
-# Namespace
-package perluim::hub;
-
-# Nimsoft librairies !
+# Nimsoft packages
 use lib "D:/apps/Nimsoft/perllib";
 use lib "D:/apps/Nimsoft/Perl64/lib/Win32API";
 use Nimbus::API;
-use Nimbus::PDS;
 use Nimbus::CFG;
+use Nimbus::PDS;
 
 # perluim packages
+use perluim::hub;
 use perluim::robot;
-use perluim::package;
+
+use Term::ANSIColor qw(:constants);
+use Win32::Console::ANSI;
+use Data::Dumper;
+use HTTP::Request;
+use LWP::UserAgent;
+use XML::Simple;
+$Data::Dumper::Indent = 1;
 
 sub new {
-    my ($class,$o) = @_;
-    my @addrArray;
-    if($o->get("hubaddr")) {
-        @addrArray = split("/",$o->get("hubaddr"));
-    }
+    my ($class,$domain) = @_;
     my $this = {
-        name        => $o->get("name") || $o->get("hubname"),
-        robotname   => $o->get("robotname") || $addrArray[4] || "undefined",
-        addr        => $o->get("addr") || $o->get("hubaddr"),
-        domain      => $o->get("domain"),
-        ip          => $o->get("ip") || $o->get("hubip"),
-        port        => $o->get("port"),
-        status      => $o->get("status"),
-        version     => $o->get("version"),
-        origin      => $o->get("origin") || "BP2I",
-        source      => $o->get("source"),
-        last        => $o->get("last"),
-        origin      => $o->get("origin"),
-        license     => $o->get("license"),
-        sec_on      => $o->get("sec_on"),
-        sec_ver     => $o->get("sec_ver"),
-        ssl_mode    => $o->get("ssl_mode"),
-        ldap        => $o->get("ldap"),
-        ldap_version => $o->get("ldap_version") || "unknown",
-        tunnel      => $o->get("tunnel") || "no",
-        uptime      => $o->get("uptime") || 0,
-        started     => $o->get("started") || 0
+        domain => $domain,
+        user => undef,
+        password => undef,
+        console => undef
     };
     return bless($this,ref($class) || $class);
 }
 
-sub removeRobot {
-	my ($self,$robotName) = @_;
-	my $PDS = pdsCreate();
-	pdsPut_PCH ($PDS,"name",$robotName);
-	pdsPut_PCH ($PDS,"name","controller");
-
-	my ($RC, $O) = nimNamedRequest("$self->{addr}", "removerobot", $PDS);
-	pdsDelete($PDS);
-    return $RC;
+sub setLog {
+    my ($self,$console) = @_;
+    $self->{console} = $console;
 }
 
-sub getRobots {
-    my ($self,$robotname) = @_;
+sub setAuthentification {
+    my ($self,$user,$password) = @_;
+    $self->{user} = $user;
+    $self->{password} = $password;
+}
+
+sub HTTP {
+    my ($self,$method,$URL) = @_;
+    my $request = HTTP::Request->new("$method" => "$URL");
+    $request->header( 'content-type' => 'application/json' );
+    $request->header( 'accept' => 'application/json' );
+    $request->authorization_basic( "$self->{user}", "$self->{password}" );
+    my $ua = LWP::UserAgent->new( ssl_opts => {
+        verify_hostname => 0,
+        SSL_verify_mode => 0x00
+    });
+    $ua->timeout(30);
+    my $response = $ua->request($request);
+    return $response
+}
+
+sub getLocalRobot {
+    my ($self) = @_;
+
     my $PDS = pdsCreate();
-    pdsPut_PCH($PDS,"name","$robotname");
-    my ($RC,$NMS_RES) = nimNamedRequest("$self->{addr}","getrobots",$PDS,10);
+    my ($RC,$NMS_RES) = nimNamedRequest("controller","get_info",$PDS,1);
     pdsDelete($PDS);
 
     if($RC == NIME_OK) {
-        return $RC,Nimbus::PDS->new($NMS_RES);
+        my $RobotNFO = Nimbus::PDS->new($NMS_RES)->asHash();
+        my $PDS = new Nimbus::PDS();
+        foreach my $key (keys $RobotNFO) {
+            $PDS->put($key,$RobotNFO->{$key},PDS_PCH);
+        }
+        return $RC,new perluim::robot($PDS);
     }
     else {
         return $RC,undef;
     }
 }
 
-#
-# => Get an Array of robots in the instanciate HUB!
-#
-sub getArrayRobots {
+sub getAllRobots {
     my ($self) = @_;
-    my $PDS = pdsCreate();
-    my ($RC,$NMS_RES) = nimNamedRequest("$self->{addr}","getrobots",$PDS,10);
-    pdsDelete($PDS);
-
-    my @RobotsList = ();
-    if($RC == NIME_OK) {
-        my $ROBOTS_PDS = Nimbus::PDS->new($NMS_RES);
-        for( my $count = 0; my $ROBOTNFO = $ROBOTS_PDS->getTable("robotlist",PDS_PDS,$count); $count++) {
-            my $ROBOT = new perluim::robot($ROBOTNFO);
-            push(@RobotsList,$ROBOT);
+    my @LIST_HUB        = $self->getArrayHubs();
+    my %LIST_ROBOTS     = ();
+    foreach my $hub (@LIST_HUB) {
+        my @ROBOTS = $hub->getArrayRobots();
+        foreach my $robot (@ROBOTS) {
+            $LIST_ROBOTS{lc $robot->{name}} = $robot;
         }
     }
-    return $RC,@RobotsList;
+    return %LIST_ROBOTS;
 }
 
-#
-# => Get an Hash of robots in the instanciate HUB!
-#
-sub getHashRobots {
+sub getLocalHub {
     my ($self) = @_;
+
     my $PDS = pdsCreate();
-    my ($RC,$NMS_RES) = nimNamedRequest("$self->{addr}","getrobots",$PDS,10);
+    my ($RC,$NMS_RES) = nimNamedRequest("hub","get_info",$PDS,1);
+    pdsDelete($PDS);
+
+    if($RC == NIME_OK) {
+        my $RobotNFO = Nimbus::PDS->new($NMS_RES)->asHash();
+        my $PDS = new Nimbus::PDS();
+        foreach my $key (keys $RobotNFO) {
+            $PDS->put($key,$RobotNFO->{$key},PDS_PCH);
+        }
+        return $RC,new perluim::hub($PDS);
+    }
+    else {
+        return $RC,undef;
+    }
+}
+
+sub getArrayHubs {
+    my ($self,$hubADDR) = @_;
+    my $focus_hubADDR = $hubADDR || "hub";
+    my $PDS = pdsCreate();
+    my ($RC,$NMS_RES) = nimNamedRequest("$focus_hubADDR","gethubs",$PDS,10);
+    pdsDelete($PDS);
+    if($RC == NIME_OK) {
+        my $HUBS_PDS = Nimbus::PDS->new($NMS_RES);
+        my @Hubslist = ();
+        for( my $count = 0; my $HUBNFO = $HUBS_PDS->getTable("hublist",PDS_PDS,$count); $count++) {
+            my $HUB = new perluim::hub($HUBNFO);
+            push(@Hubslist,$HUB);
+        }
+        return $RC,@Hubslist;
+    }
+    else {
+        return $RC,undef;
+    }
+}
+
+sub getHashHubs {
+    my ($self,$hubADDR) = @_;
+    my $focus_hubADDR = $hubADDR || "hub";
+    my $PDS = pdsCreate();
+    my ($RC,$NMS_RES) = nimNamedRequest("$focus_hubADDR","gethubs",$PDS,10);
+    pdsDelete($PDS);
+    if($RC == NIME_OK) {
+        my $HUBS_PDS = Nimbus::PDS->new($NMS_RES);
+        my %Hubslist = ();
+        for( my $count = 0; my $HUBNFO = $HUBS_PDS->getTable("hublist",PDS_PDS,$count); $count++) {
+            my $HUB = new perluim::hub($HUBNFO);
+            $Hubslist{$HUB->{name}} = $HUB;
+        }
+        return $RC,%Hubslist;
+    }
+    else {
+        return $RC,undef;
+    }
+}
+
+sub createDirectory {
+    my ($self,$path) = @_;
+    my @dir = split("/",$path);
+    my $track = "";
+    foreach(@dir) {
+        my $path = $track.$_;
+        if( !(-d $path) ) {
+            mkdir($path) or die "Unable to create $_ directory!";
+        }
+        $track .= "$_/";
+    }
+}
+
+sub getDate {
+    my ($self) = @_;
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+    my $timestamp   = sprintf ( "%04d%02d%02d %02d:%02d:%02d",$year+1900,$mon+1,$mday,$hour,$min,$sec);
+	$timestamp     =~ s/\s+/_/g;
+	$timestamp     =~ s/://g;
+    return $timestamp;
+}
+
+sub getHashRobots {
+    my ($self,$hubname,$hubserver) = @_;
+    my $addr = "/$self->{domain}/$hubname/$hubserver/hub";
+    my $PDS = pdsCreate();
+    my ($RC,$NMS_RES) = nimNamedRequest("$addr","getrobots",$PDS,10);
     pdsDelete($PDS);
 
     if($RC == NIME_OK) {
@@ -116,102 +194,57 @@ sub getHashRobots {
     }
 }
 
-#
-# => Get Archive information
-#
-sub getArchivePackages {
-    my ($self,$name,$version) = @_;
+sub getArrayRobots {
+    my ($self,$hubname,$hubserver) = @_;
+    my $addr = "/$self->{domain}/$hubname/$hubserver/hub";
     my $PDS = pdsCreate();
-    my $clean_addr = substr($self->{addr},0,-4);
-    my ($RC,$NMS_RES) = nimNamedRequest("$clean_addr/automated_deployment_engine","archive_list",$PDS,10);
+    my ($RC,$NMS_RES) = nimNamedRequest("$addr","getrobots",$PDS,10);
     pdsDelete($PDS);
 
-    my %PackagesList = ();
     if($RC == NIME_OK) {
-        my $PKG_PDS = Nimbus::PDS->new($NMS_RES);
-        for( my $count = 0; my $PKG_INFO = $PKG_PDS->getTable("entry",PDS_PDS,$count); $count++) {
-            my $PKG = new perluim::package($PKG_INFO);
-            if(defined($PKG->{version}) && $PKG->{version} ne "") {
-                $PackagesList{"$PKG->{name}_$PKG->{version}_$PKG->{build}"} = $PKG;
-            }
-            else {
-                $PKG->setValid(0);
-                $PackagesList{"$PKG->{name}_NV"} = $PKG;
-            }
+        my $ROBOTS_PDS = Nimbus::PDS->new($NMS_RES);
+        my @RobotsList = ();
+        for( my $count = 0; my $ROBOTNFO = $ROBOTS_PDS->getTable("robotlist",PDS_PDS,$count); $count++) {
+            my $ROBOT = new perluim::robot($ROBOTNFO);
+            push(@RobotsList,$ROBOT);
         }
-        return $RC,%PackagesList;
+        return $RC,@RobotsList;
     }
     else {
-        return $RC,%PackagesList;
+        return $RC,undef;
     }
 }
 
-sub getEnv {
-    my ($self,$var) = @_;
+sub getLocalArrayRobots {
+    my ($self,$retry) = @_;
+    my $maxRetry = defined($retry) ? $retry : 1;
+    my @RobotsList = ();
 
-    my $PDS = pdsCreate();
-    if(defined($var)) {
-        pdsPut_PCH ($PDS,"variable","$var");
+    my ($RC,$NMS_RES);
+    while($maxRetry--) {
+        my $PDS = pdsCreate();
+        ($RC,$NMS_RES) = nimNamedRequest("hub","getrobots",$PDS,10);
+        pdsDelete($PDS);
+        if($RC == NIME_OK) {
+            my $ROBOTS_PDS = Nimbus::PDS->new($NMS_RES);
+            for( my $count = 0; my $ROBOTNFO = $ROBOTS_PDS->getTable("robotlist",PDS_PDS,$count); $count++) {
+                my $ROBOT = new perluim::robot($ROBOTNFO);
+                push(@RobotsList,$ROBOT);
+            }
+            last;
+        }
+        else {
+            $self->doSleep(2);
+        }
     }
-    my $clean_addr = substr($self->{addr},0,-4);
-    my ($RC,$RES) = nimNamedRequest("$clean_addr/controller","get_environment",$PDS,10);
-    pdsDelete($PDS);
+    return $RC,@RobotsList;
+}
 
-    if($RC == NIME_OK) {
-        my $Hash = Nimbus::PDS->new($RES)->asHash();
-        return $RC,$Hash;
+sub doSleep {
+    my ($self,$sleepTime) = @_;
+    while($sleepTime--) {
+        sleep(1);
     }
-    return $RC,undef;
-}
-
-sub getInfo {
-    my ($self) = @_;
-
-    my $PDS = pdsCreate();
-    my $clean_addr = substr($self->{addr},0,-4);
-    my ($RC,$RES) = nimNamedRequest("$clean_addr/controller","get_info",$PDS,10);
-    pdsDelete($PDS);
-
-    if($RC == NIME_OK) {
-        my $Hash = Nimbus::PDS->new($RES)->asHash();
-        return $RC,$Hash;
-    }
-    return $RC,undef;
-}
-
-sub ade_addPackageSyncRule {
-    my ($self,$pkg) = @_;
-
-    my $PDS = pdsCreate();
-    pdsPut_PCH ($PDS,"name",$pkg->{name});
-    pdsPut_PCH ($PDS,"rule_type","ALL");
-    my $clean_addr = substr($self->{addr},0,-4);
-    my ($RC,$NMS_RES) = nimNamedRequest("$clean_addr/automated_deployment_engine","add_package_sync_rule",$PDS,10);
-    pdsDelete($PDS);
-    return $RC;
-}
-
-sub deletePackage {
-    my ($self,$name,$version) = @_;
-
-    my $PDS = pdsCreate();
-    my $clean_addr = substr($self->{addr},0,-4);
-    pdsPut_PCH($PDS,"name","$name");
-    pdsPut_PCH($PDS,"version","$version");
-    my ($RC,$NMS_RES) = nimNamedRequest("$clean_addr/automated_deployment_engine","archive_delete",$PDS,10);
-    pdsDelete($PDS);
-
-    return $RC;
-}
-
-sub probeVerify {
-    my ($self,$probeName) = @_;
-    my $PDS = pdsCreate();
-    pdsPut_PCH($PDS,"name","automated_deployment_engine");
-    my $FilterADDR = substr($self->{addr},0,-4);
-    my ($RC,$NMS_RES) = nimNamedRequest("$FilterADDR/controller","probe_verify",$PDS,10);
-    pdsDelete($PDS);
-    return $RC;
 }
 
 1;
