@@ -17,7 +17,7 @@ $Console->print("Execution start at ".localtime(),5);
 $Console->setLevel(3);
 
 $Console->print("Instanciating perluim framework!",3);
-$SDK = new perluim::main("test_probe","PRODUCTION");
+$SDK = new perluim::main("DOMAIN-PROD");
 $SDK->setLog($Console);
 $Console->print("Create output directory.");
 $Execution_Date = $SDK->getDate();
