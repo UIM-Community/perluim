@@ -57,6 +57,13 @@ if($RC == NIME_OK) {
 }
 ```
 
+# Features 
+
+- Default structure (need to work on deamon)
+- Actions on hubs/robots/probes/packages
+- First step to work with UIM Rest (Need more work on this part..) 
+- Better logs
+
 # Contribution welcome 
 
 - Better UMP class (to do action on the REST API, and switch UMP if needed, HTTP request etc..). 
