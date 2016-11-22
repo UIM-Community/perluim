@@ -146,6 +146,39 @@ sub getArchivePackages {
     }
 }
 
+sub getEnv {
+    my ($self,$var) = @_;
+
+    my $PDS = pdsCreate();
+    if(defined($var)) {
+        pdsPut_PCH ($PDS,"variable","$var");
+    }
+    my $clean_addr = substr($self->{addr},0,-4);
+    my ($RC,$RES) = nimNamedRequest("$clean_addr/controller","get_environment",$PDS,10);
+    pdsDelete($PDS);
+
+    if($RC == NIME_OK) {
+        my $Hash = Nimbus::PDS->new($RES)->asHash();
+        return $RC,$Hash;
+    }
+    return $RC,undef;
+}
+
+sub getInfo {
+    my ($self) = @_;
+
+    my $PDS = pdsCreate();
+    my $clean_addr = substr($self->{addr},0,-4);
+    my ($RC,$RES) = nimNamedRequest("$clean_addr/controller","get_info",$PDS,10);
+    pdsDelete($PDS);
+
+    if($RC == NIME_OK) {
+        my $Hash = Nimbus::PDS->new($RES)->asHash();
+        return $RC,$Hash;
+    }
+    return $RC,undef;
+}
+
 sub ade_addPackageSyncRule {
     my ($self,$pkg) = @_;
 
