@@ -11,26 +11,31 @@ CA UIM perl object-oriented framework. This framework is used in 10+ probes for 
 use perluim::main;
 use perluim::log;
 
-my $Console = new perluim::log("test_probe.log");
-my $ScriptExecutionTime = time();
+my ($Console,$ScriptExecutionTime,$SDK,Execution_Date);
+
+$Console = new perluim::log("test_probe.log");
+$ScriptExecutionTime = time();
 $Console->print("Execution start at ".localtime(),5);
 $Console->setLevel(3);
 
 $Console->print("Instanciating perluim framework!",3);
-my $SDK = new perluim::main("test_probe","PRODUCTION");
+$SDK = new perluim::main("test_probe","PRODUCTION");
 $SDK->setLog($Console);
 $Console->print("Create output directory.");
-my $Execution_Date = $SDK->getDate();
+$Execution_Date = $SDK->getDate();
 $SDK->createDirectory("output/$Execution_Date");
 ```
 
 ### Get robots or hubs 
 ```perl
-my @Hubs = $SDK->getArrayHubs();
-foreach my $hub (@Hubs) {
-    # Hub is perluim:hub class
-    my @Robots $hub->getArrayRobots();
+my ($RC,@Hubs) = $SDK->getArrayHubs();
+if($RC == NIME_OK) {
+    foreach my $hub (@Hubs) {
+        # Hub is perluim:hub class
+        my @Robots $hub->getArrayRobots();
+    }
 }
+
 
 # Or if you need directly all robots 
 my %Robots = $SDK->getAllRobots(); # Key = robotname, value = class robot
@@ -38,14 +43,16 @@ my %Robots = $SDK->getAllRobots(); # Key = robotname, value = class robot
 
 ### Get archive packages from hubs 
 ```perl
-my @Hubs = $SDK->getArrayHubs();
-foreach my $hub (@Hubs) {
-    # Hub is perluim:hub class
-    my ($RC,@Packages) = $hub->getArchivePackages();
-    if($RC) {
-        # Exploit packages class here!
-        # Delete package ?
-        my $rc_deleted = $hub->deletePackage('name','version');
+my ($RC,@Hubs) = $SDK->getArrayHubs();
+if($RC == NIME_OK) {
+    foreach my $hub (@Hubs) {
+        # Hub is perluim:hub class
+        my ($RC,@Packages) = $hub->getArchivePackages();
+        if($RC == NIME_OK) {
+            # Exploit packages class here!
+            # Delete package ?
+            my $rc_deleted = $hub->deletePackage('name','version');
+        }
     }
 }
 ```
