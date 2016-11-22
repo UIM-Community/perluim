@@ -13,9 +13,11 @@ use Nimbus::CFG;
 
 sub new {
     my ($class,$name,$o,$addr) = @_;
+    my @addrArray = split("/",$addr);
     my $this = {
         name            => $o->{$name}{"name"},
         addr            => $addr,
+        robotname       => $addrArray[3],
         description     => $o->{$name}{"description"}  || "",
         group           => lc $o->{$name}{"group"}  || "",
         active          => $o->{$name}{"active"},
@@ -44,104 +46,125 @@ sub new {
 
 sub getCfg {
     my ($self,$filepath) = @_;
-    my $tempGroup   = "probes/$self->{group}/$self->{name}/";
-    my $configName  = $self->{config};
-
-    $self->{local_cfg} = "$filepath"."$self->{config}";
+    my $directory   = "probes/$self->{group}/$self->{name}/";
 
     if($self->{name} eq "hub") {
-        $tempGroup = "hub";
-        $configName = "hub.cfg";
+        $directory = "hub";
+    }
+    elsif($self->{name} eq "controller" || $self->{name} eq "spooler" || $self->{name} eq "robot") {
+        $directory = "robot";
+    }
+    elsif($self->{name} eq "hdb") {
+        return 1;
+    }
+    elsif($self->{name} eq "distsrv") {
+        $directory = "probes/service/distsrv";
+    }
+    elsif($self->{name} eq "nas") {
+        $directory = "probes/service/$self->{name}/";
     }
 
-    if($self->{name} eq "controller") {
-        $tempGroup = "robot";
-        $configName = "controller.cfg";
-    }
+    my $PDS = pdsCreate();
+    pdsPut_PCH ($PDS,"directory",$directory);
+    pdsPut_PCH ($PDS,"file","$self->{name}.cfg");
+    pdsPut_INT ($PDS,"buffer_size",10000000);
 
-    if($self->{name} eq "nas") {
-        $tempGroup = "probes/service/$self->{name}/";
-    }
+    my ($RC, $RES) = nimRequest("$self->{robotname}",48000, "text_file_get", $PDS,5);
+    pdsDelete($PDS);
 
-    if($self->{name} eq "controller") {
-        my $PDS_args = pdsCreate();
-        pdsPut_PCH ($PDS_args,"directory",$tempGroup);
-        pdsPut_PCH ($PDS_args,"file","robot.cfg");
-        pdsPut_INT ($PDS_args,"buffer_size",10000000);
+    if($RC == NIME_OK) {
+        my $CFG_Handler;
 
-        my ($RC, $ProbePDS_CFG) = nimRequest("$self->{robotname}",48000, "text_file_get", $PDS_args,3);
-        pdsDelete($PDS_args);
-
-        if($RC == NIME_OK) {
-            my $CFG_Handler;
-
-            unless(open($CFG_Handler,">>","$filepath/robot.cfg")) {
-                warn "\nUnable to create configuration file for robot probe on path $filepath\n";
-                return 0;
-            }
-            my @ARR_CFG_Config = Nimbus::PDS->new($ProbePDS_CFG)->asHash();
-            print $CFG_Handler $ARR_CFG_Config[0]{'file_content'};
-            close $CFG_Handler;
-        }
-        else {
-
-        }
-    }
-
-    {
-        my $PDS_args = pdsCreate();
-        pdsPut_PCH ($PDS_args,"directory",$tempGroup);
-        pdsPut_PCH ($PDS_args,"file","$configName");
-        pdsPut_INT ($PDS_args,"buffer_size",10000000);
-
-        my ($RC, $ProbePDS_CFG) = nimRequest("$self->{robotname}",48000, "text_file_get", $PDS_args,3);
-        pdsDelete($PDS_args);
-
-        if($RC == NIME_OK) {
-            my $CFG_Handler;
-
-            unless(open($CFG_Handler,">>","$filepath/$configName")) {
-                warn "\nUnable to create configuration file for $self->{name} probe on path $filepath\n";
-                return 0;
-            }
-            my @ARR_CFG_Config = Nimbus::PDS->new($ProbePDS_CFG)->asHash();
-            print $CFG_Handler $ARR_CFG_Config[0]{'file_content'};
-            close $CFG_Handler;
-
+        unless(open($CFG_Handler,">>","$filepath/$self->{name}.cfg")) {
             return 1;
         }
-        else {
-
-            return 0;
-        }
+        my @ARR_CFG_Config = Nimbus::PDS->new($RES)->asHash();
+        print $CFG_Handler $ARR_CFG_Config[0]{'file_content'};
+        close $CFG_Handler;
     }
+    return $RC;
 
 }
 
 sub getLog {
     my ($self,$filepath) = @_;
 
-    my $logName = "$self->{name}.log";
-    my $log_pds = pdsCreate();
-    pdsPut_PCH ($log_pds,"directory","probes/$self->{group}/$self->{name}/");
-    pdsPut_PCH ($log_pds,"file","$logName");
-    pdsPut_INT ($log_pds,"buffer_size",10000000);
+    my $directory = "probes/$self->{group}/$self->{name}/";
+    if($self->{name} eq "hub") {
+        $directory = "hub";
+    }
+    elsif($self->{name} eq "controller" || $self->{name} eq "spooler") {
+        $directory = "robot";
+    }
+    elsif($self->{name} eq "nas") {
+        $directory = "probes/service/nas";
+    }
+    elsif($self->{name} eq "hdb") {
+        $directory = "probes/service/hdb";
+    }
+    elsif($self->{name} eq "distsrv") {
+        $directory = "probes/service/distsrv";
+    }
 
-    my ($RC_LOG, $LOGPDS) = nimRequest("$self->{robotname}","48000", "text_file_get", $log_pds,3);
-    pdsDelete($log_pds);
+    my $PDS = pdsCreate();
+    pdsPut_PCH ($PDS,"directory",$directory);
+    pdsPut_PCH ($PDS,"file","$self->{name}.log");
+    pdsPut_INT ($PDS,"buffer_size",10000000);
 
-    if($RC_LOG == NIME_OK) {
+    my ($RC, $RES) = nimRequest("$self->{robotname}","48000", "text_file_get", $PDS,3);
+    pdsDelete($PDS);
+
+    if($RC == NIME_OK) {
         my $CFG_Handler;
-        unless(open($CFG_Handler,">>","$filepath/$logName")) {
-            warn "\nUnable to create log file\n";
-            return 0;
+        unless(open($CFG_Handler,">>","$filepath/$self->{name}.log")) {
+            return 1;
         }
-        my @ARR_CFG_Config = Nimbus::PDS->new($LOGPDS)->asHash();
+        my @ARR_CFG_Config = Nimbus::PDS->new($RES)->asHash();
         print $CFG_Handler $ARR_CFG_Config[0]{'file_content'};
         close $CFG_Handler;
-        return 1;
     }
-    return 0;
+    return $RC;
+}
+
+sub setKey {
+    my ($self,$section,$key,$value) = @_;
+
+    my $PDS_args = pdsCreate();
+    pdsPut_PCH ($PDS_args,"name","$self->{name}");
+    pdsPut_PCH ($PDS_args,"section","$section");
+    pdsPut_PCH ($PDS_args,"key","$key");
+    pdsPut_PCH ($PDS_args,"value","$value");
+    pdsPut_PCH ($PDS_args,"robot","1");
+
+    my ($RC, $O) = nimNamedRequest("$self->{addr}/controller", "probe_config_set", $PDS_args,3);
+    pdsDelete($PDS_args);
+
+    return $RC;
+}
+
+sub getKey {
+    my ($self,$var) = @_;
+
+    my $PDS_args = pdsCreate();
+    pdsPut_PCH ($PDS_args,"name","$self->{name}");
+    if(defined($var)) {
+        pdsPut_PCH ($PDS_args,"var","$var");
+    }
+
+    my ($RC, $RES) = nimNamedRequest("$self->{addr}/controller", "probe_config_get", $PDS_args,3);
+    pdsDelete($PDS_args);
+
+    if($RC == NIME_OK) {
+        if(defined($var)) {
+            my $value = (Nimbus::PDS->new($RES))->get("value");
+            return $RC,$value;
+        }
+        else {
+            my $Hash = Nimbus::PDS->new($RES)->asHash();
+            return $RC,$Hash;
+        }
+    }
+    return $RC,undef;
 }
 
 1;
