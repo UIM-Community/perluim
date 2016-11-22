@@ -70,7 +70,7 @@ if($RC == NIME_OK) {
 # Roadmap 
 
 - Continue to work on documentation.
-- Add probeExist to robot API.
+- [x] Add probeExist to robot API.
 - Add getCfg(probeName,path) to robot API.
 - Add getLog(probeName,path) to robot API.
 - Rework main class (better instanciating/configuration syntax).
