@@ -59,21 +59,6 @@ sub removeRobot {
     return $RC;
 }
 
-sub getRobots {
-    my ($self,$robotname) = @_;
-    my $PDS = pdsCreate();
-    pdsPut_PCH($PDS,"name","$robotname");
-    my ($RC,$NMS_RES) = nimNamedRequest("$self->{addr}","getrobots",$PDS,10);
-    pdsDelete($PDS);
-
-    if($RC == NIME_OK) {
-        return $RC,Nimbus::PDS->new($NMS_RES);
-    }
-    else {
-        return $RC,undef;
-    }
-}
-
 #
 # => Get an Array of robots in the instanciate HUB!
 #
