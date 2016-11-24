@@ -16,6 +16,7 @@ use perluim::robot;
 use perluim::package;
 use perluim::archive;
 use perluim::probe;
+use perluim::queue;
 
 sub new {
     my ($class,$o) = @_;
@@ -157,6 +158,64 @@ sub archive {
     return new perluim::archive($self);
 }
 
+sub tunnelsList {
+    my ($self) = @_; 
+
+    my $PDS = pdsCreate();
+    pdsPut_PCH($PDS,"queue","$queueName");
+    my ($RC,$RES) = nimNamedRequest("$self->{addr}","tunnel_get_info",$PDS,5);
+    if($RC == NIME_OK) {
+        my @Tunnels = ();
+        my $TunnelPDS = Nimbus::PDS->new($RES);
+        for( my $count = 0; my $T = $TunnelPDS->getTable("tunnels",PDS_PDS,$count); $count++) {
+            my $TunnelObject = new perluim::tunnels($T);
+            push(@Tunnels,$TunnelObject);
+        }
+        return $RC,@Tunnels;
+    }
+    
+    return $RC,undef;
+}
+
+sub queueState {
+    my ($self,$queueName,$state) = @_; # State equal 1/0
+
+    my $PDS = pdsCreate();
+    pdsPut_PCH($PDS,"queue","$queueName");
+    pdsPut_INT($PDS,"active",$state);
+    my ($RC,$RES) = nimNamedRequest("$self->{addr}","queue_active",$PDS,5);
+
+    return $RC;
+}
+
+sub queueDelete {
+    my ($self,$queueName) = @_;
+
+    my $PDS = pdsCreate();
+    pdsPut_PCH($PDS,"queue","$queueName");
+    my ($RC,$RES) = nimNamedRequest("$self->{addr}","queue_delete",$PDS,5);
+
+    return $RC;
+}
+
+sub queueList {
+    my ($self) = @_;
+
+    my $PDS = pdsCreate();
+    pdsPut_PCH($PDS,"queue","$queueName");
+    my ($RC,$RES) = nimNamedRequest("$self->{addr}","queue_list",$PDS,5);
+    if($RC == NIME_OK) {
+        my @Queue = ();
+        my $Queue_PDS = Nimbus::PDS->new($RES);
+        for( my $count = 0; my $Q = $Queue_PDS->getTable("sections",PDS_PDS,$count); $count++) {
+            my $QueueObject = new perluim::queue($Q);
+            push(@Queue,$QueueObject);
+        }
+        return $RC,@Queue;
+    }
+    return $RC,undef;
+
+}
 
 sub probeVerify {
     my ($self,$probeName) = @_;
