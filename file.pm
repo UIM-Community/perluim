@@ -5,15 +5,15 @@ package perluim::file;
 sub new {
     my ($class,$fileName) = @_;
     my $this = {
-        fileName => $fileName,
+        fileName => $fileName || undef,
         content => undef
     };
     return bless($this,ref($class) || $class);
 }
 
 sub load {
-    my ($self) = @_;
-    if(open(my $list, '<:encoding(UTF-8)',$self->{fileName})) {
+    my ($self,$fileName) = @_;
+    if(open(my $list, '<:encoding(UTF-8)',$self->{fileName} || $fileName)) {
         my @Rows = ();
         while(my $row = <$list>) {
             $row =~ s/^\s+|\s+$//g;
@@ -28,8 +28,8 @@ sub load {
 }
 
 sub loadString {
-    my ($self) = @_;
-    if(open(my $list, '<:encoding(UTF-8)',$self->{fileName})) {
+    my ($self,$fileName) = @_;
+    if(open(my $list, '<:encoding(UTF-8)',$self->{fileName} || $fileName)) {
         my $Str = "";
         while(my $row = <$list>) {
             $row =~ s/^\s+|\s+$//g;
