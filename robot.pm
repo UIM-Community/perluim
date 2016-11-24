@@ -465,4 +465,13 @@ sub moveRobot {
     }
 }
 
+sub cacheClean {
+    my ($self) = @_;
+    my $PDS = pdsCreate();
+    pdsPut_PCH ($PDS,"robot",$self->{name});
+    my ($RC,$OBJ) = nimNamedRequest( "$self->{addr}/controller", "_nis_cache_clean",$PDS,2);
+    pdsDelete($PDS);
+    return $RC;
+}
+
 1;
