@@ -320,4 +320,149 @@ sub probeActivate {
 	return $RC;
 }
 
+sub updateOrigin {
+	my ($self, $value) = @_;
+	my $PDS = pdsCreate();
+
+    # Prepare PDS
+	pdsPut_PCH ($PDS,"name","spooler");
+	pdsPut_PCH ($PDS,"section","spooler");
+	pdsPut_PCH ($PDS,"key","origin");
+	pdsPut_PCH ($PDS,"value",$value);
+
+	my ($RC, $OBJ) = nimNamedRequest("$self->{addr}/controller", "probe_config_set", $PDS,2);
+	pdsDelete($PDS);
+
+	return $RC;
+}
+
+sub updateDomain {
+	my ($self, $value) = @_;
+    # Prepare PDS
+	my $PDS = pdsCreate();
+	my $PDS_OPTION = pdsCreate();
+
+    # Prepare PDS
+	pdsPut_PCH ($PDS_OPTION,"/controller/domain",$value) ;
+	pdsPut_PCH ($PDS,"name","controller");
+	pdsPut_PDS ($PDS,"as_pds",$PDS_OPTION);
+
+	my ($RC, $OBJ) = nimNamedRequest("$self->{addr}/controller", "probe_config_set", $PDS,2);
+	pdsDelete($PDS);
+
+	return $RC;
+}
+
+sub updateUsertag2 {
+	my ($self, $value) = @_;
+	my $PDS = pdsCreate();
+	my $PDS_OPTION = pdsCreate();
+
+    # Prepare PDS
+	pdsPut_PCH ($PDS_OPTION,"/controller/os_user2",$value) ;
+	pdsPut_PCH ($PDS,"name","controller");
+	pdsPut_PDS ($PDS,"as_pds",$PDS_OPTION);
+
+	my ($RC, $OBJ) = nimNamedRequest("$self->{addr}/controller", "probe_config_set", $PDS,2);
+	pdsDelete($PDS_OPTION);
+	pdsDelete($PDS);
+
+	return $RC;
+}
+
+sub updateSecondary {
+	my ($domain,$hubname,$hubrobot_name) = @_;
+
+	my $PDS_CONFIG = pdsCreate();
+	pdsPut_PCH($PDS_CONFIG, "/controller/secondary_domain", "$domain");
+	pdsPut_PCH($PDS_CONFIG, "/controller/secondary_hub", "$hubname");
+	pdsPut_PCH($PDS_CONFIG, "/controller/secondary_hubrobotname", "$hubrobot_name");
+	pdsPut_PCH($PDS_CONFIG, "/controller/temporary_hub_broadcast","no");
+	pdsPut_PCH($PDS_CONFIG, "/controller/secondary_hubip", "$hubrobot_name");
+	pdsPut_PCH($PDS_CONFIG, "/controller/secondary_hubport", "48002");
+
+	my $PDS = pdsCreate();
+	pdsPut_PCH ($PDS,"name","controller");
+	pdsPut_PDS ($PDS,"as_pds",$PDS_CONFIG);
+
+	my ($RC, $O) = nimNamedRequest("$self->{addr}/controller", "probe_config_set", $PDS);
+	pdsDelete($PDS);
+	pdsDelete($PDS_CONFIG);
+
+	return $RC;
+}
+
+sub setMaintenance {
+	my ($self,$state,$time) = @_;
+    my $OK = "no";
+    if($state eq "actif" || $state eq "inactif") {
+        $OK = "yes";
+    }
+
+    if($OK eq "yes") {
+        if ($state eq "inactif") {
+            my $PDS = pdsCreate();
+            pdsPut_INT ($PDS,"for",$time || 31536000) ;
+            pdsPut_INT ($PDS,"until",0) ;
+            pdsPut_PCH ($PDS,"comment","AssetState = Not In Use");
+            my ($RC, $OBJ) = nimNamedRequest("$self->{addr}/controller", "maint_until", $PDS);
+            pdsDelete($PDS);
+            return $RC;
+        }
+        elsif ($state eq "actif") {
+            my $PDS = pdsCreate();
+            pdsPut_INT ($PDS,"for",0) ;
+            pdsPut_INT ($PDS,"until",0) ;
+            pdsPut_PCH ($PDS,"comment","AssetState = In Use");
+            my ($RC, $OBJ) = nimNamedRequest("$self->{addr}/controller", "maint_until", $PDS);
+            pdsDelete($PDS);
+            return $RC;
+        }
+    }
+    else {
+        return 1;
+    }
+}
+
+sub moveRobot {
+	my ($self,$domain,$source_hubname,$source_robot, $primary_hub, $primary_servername, $secondary_hub, $secondary_servername) = (@_);
+
+    # Step 1
+    {
+        my $PDS_OPTION = pdsCreate();
+        pdsPut_PCH($PDS_OPTION, "/controller/secondary_domain", $domain);
+        pdsPut_PCH($PDS_OPTION, "/controller/secondary_hub", $secondary_hub);
+        pdsPut_PCH($PDS_OPTION, "/controller/secondary_hubrobotname", $secondary_servername);
+        pdsPut_PCH($PDS_OPTION, "/controller/temporary_hub_broadcast","no");
+        pdsPut_PCH($PDS_OPTION, "/controller/secondary_hubip", $secondary_servername);
+        pdsPut_PCH($PDS_OPTION, "/controller/secondary_hubport", "48002");
+        pdsPut_PCH($PDS_OPTION, "/controller/secondary_hub_dns_name","");
+
+        my $PDS_ARGS = pdsCreate();
+        pdsPut_PCH ($PDS_ARGS,"name","controller");
+        pdsPut_PDS ($PDS_ARGS,"as_pds",$PDS_OPTION);
+
+        my ($RC, $O) = nimNamedRequest("/$domain/$Source_HubName/$source_robot/controller", "probe_config_set", $PDS_ARGS);
+        pdsDelete($PDS_OPTION);
+        pdsDelete($PDS_ARGS);
+
+        return $RC if $RC != NIME_OK;
+    }
+
+    # Step 2
+    {
+        my $PDS_ARGS = pdsCreate();
+        pdsPut_PCH ($PDS_ARGS,"hubdomain",$domain);
+        pdsPut_PCH ($PDS_ARGS,"hubname",$primary_hub);
+        pdsPut_PCH ($PDS_ARGS, "hubip", $primary_servername);
+        pdsPut_PCH ($PDS_ARGS, "hubport", "");
+        pdsPut_PCH ($PDS_ARGS, "hub_dns_name",$primary_servername);
+        pdsPut_PCH ($PDS_ARGS, "robotip_alias", "");
+
+        my ($RC, $OBJ) = nimNamedRequest("/$domain/$Source_HubName/$source_robot/controller", "sethub", $PDS_ARGS);
+
+        return $RC;
+    }
+}
+
 1;
