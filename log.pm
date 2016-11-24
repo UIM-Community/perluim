@@ -5,7 +5,7 @@ use File::Copy;
 use File::Stat;
 use File::Path 'rmtree';
 
-our %WarnState = (
+our %Log_level = (
 	0 => "[CRITICAL]",
 	1 => "[ERROR]   ",
 	2 => "[WARNING] ",
@@ -15,21 +15,30 @@ our %WarnState = (
 );
 
 sub new {
-    my ($class,$logfile,$loglevel) = @_;
+    my ($class,$logfile,$loglevel,$logsize,$logrewrite) = @_;
     my $this = {
 		logfile => $logfile,
 		loglevel => $loglevel || 3,
+		logsize => $logsize || 2048,
+		logrewrite => $logrewrite || 'yes',
 		fh => undef
     };
-	open ($this->{fh},">","$logfile");
     my $blessed = bless($this,ref($class) || $class);
+	my $rV = $blessed->{logrewrite} eq "yes" ? ">" : ">>";
+	my $fileSize = (stat $blessed->{logfile})[7];
+	if($fileSize >= $blessed->{logsize}) {
+		copy("$blessed->{logfile}","_$blessed->{logfile}") or warn "Failed to copy logfile!";
+		$rV = ">";
+	}
+	open ($this->{fh},"$rV","$logfile");
 	$blessed->print("New console instance with path $logfile!");
+	$blessed->print("File size => $fileSize");
 	return $blessed;
 }
 
 sub setLevel {
 	my ($self,$level) = @_;
-	$self->{loglevel} = $level;
+	$self->{loglevel} = $level || 5;
 }
 
 sub close {
@@ -53,8 +62,8 @@ sub print {
 	if($loglevel <= $self->{loglevel} || $loglevel == 5 || $loglevel == 4) {
 		my $date = dateLog();
 		my $filehandler = $self->{fh};
-		print $filehandler "$date $WarnState{$loglevel} - $logmsg\n";
-		print "$date $WarnState{$loglevel} - $logmsg\n";
+		print $filehandler "$date $Log_level{$loglevel} - $logmsg\n";
+		print "$date $Log_level{$loglevel} - $logmsg\n";
 	}
 }
 
