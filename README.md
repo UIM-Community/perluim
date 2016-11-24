@@ -45,7 +45,7 @@ my ($RC,@Hubs) = $SDK->getArrayHubs();
 if($RC == NIME_OK) {
     foreach my $hub (@Hubs) {
         # Hub is perluim:hub class
-        my ($RC,@Packages) = $hub->getArchivePackages();
+        my ($RC,@Packages) = $hub->archive()->getPackages();
         if($RC == NIME_OK) {
             # Exploit packages class here!
             # Delete package ?
