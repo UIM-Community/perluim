@@ -183,7 +183,7 @@ sub getArrayProbes {
         my $ProbeCFG = Nimbus::PDS->new($NMS_RES)->asHash();
         foreach my $ProbeName (keys $ProbeCFG) {
             my $Iprobe = new perluim::probe($ProbeName,$ProbeCFG,$self->{addr});
-	    $Iprobe->{robotname} = $self->{name};
+            $Iprobe->{robotname} = $self->{name};
             push(@ProbesArray,$Iprobe);
         }
         return $RC,@ProbesArray;
@@ -371,7 +371,7 @@ sub updateUsertag2 {
 }
 
 sub updateSecondary {
-	my ($domain,$hubname,$hubrobot_name) = @_;
+	my ($self,$domain,$hubname,$hubrobot_name) = @_;
 
 	my $PDS_CONFIG = pdsCreate();
 	pdsPut_PCH($PDS_CONFIG, "/controller/secondary_domain", "$domain");
@@ -442,7 +442,7 @@ sub moveRobot {
         pdsPut_PCH ($PDS_ARGS,"name","controller");
         pdsPut_PDS ($PDS_ARGS,"as_pds",$PDS_OPTION);
 
-        my ($RC, $O) = nimNamedRequest("/$domain/$Source_HubName/$source_robot/controller", "probe_config_set", $PDS_ARGS);
+        my ($RC, $O) = nimNamedRequest("/$domain/$source_hubname/$source_robot/controller", "probe_config_set", $PDS_ARGS);
         pdsDelete($PDS_OPTION);
         pdsDelete($PDS_ARGS);
 
@@ -459,7 +459,7 @@ sub moveRobot {
         pdsPut_PCH ($PDS_ARGS, "hub_dns_name",$primary_servername);
         pdsPut_PCH ($PDS_ARGS, "robotip_alias", "");
 
-        my ($RC, $OBJ) = nimNamedRequest("/$domain/$Source_HubName/$source_robot/controller", "sethub", $PDS_ARGS);
+        my ($RC, $OBJ) = nimNamedRequest("/$domain/$source_hubname/$source_robot/controller", "sethub", $PDS_ARGS);
 
         return $RC;
     }
