@@ -1,18 +1,21 @@
-use strict;
-use warnings;
 package perluim::archive;
+
+# Nimsoft librairies !
+use lib "D:/apps/Nimsoft/perllib";
+use lib "D:/apps/Nimsoft/Perl64/lib/Win32API";
+use Nimbus::API;
+use Nimbus::PDS;
+use Nimbus::CFG;
 
 use perluim::package;
 
 sub new {
     my ($class,$hub) = @_;
     my $this = {
-        hub => $hub
-        cleanAddr => undef
+        hub => $hub,
+        cleanAddr => substr($hub->{addr},0,-4)
     };
-    my $blessed = bless($this,ref($class) || $class);
-    $blessed->{cleanAddr} = substr($blessed->{hub}->{addr},0,-4);
-    return $blessed;
+    return bless($this,ref($class) || $class);
 }
 
 sub getPackages {
@@ -61,10 +64,9 @@ sub deletePackage {
     my ($self,$pkg) = @_;
 
     my $PDS = pdsCreate();
-    my $clean_addr = substr($self->{addr},0,-4);
     pdsPut_PCH($PDS,"name","$pkg->{name}");
     pdsPut_PCH($PDS,"version","$pkg->{version}");
-    my ($RC,$NMS_RES) = nimNamedRequest("$clean_addr/automated_deployment_engine","archive_delete",$PDS,10);
+    my ($RC,$NMS_RES) = nimNamedRequest("$self->{cleanAddr}/automated_deployment_engine","archive_delete",$PDS,10);
     pdsDelete($PDS);
 
     return $RC;
