@@ -10,7 +10,7 @@ use Nimbus::Session;
 use Nimbus::CFG;
 use Nimbus::PDS;
 
-our @EXPORT_OK = qw(minIndex getTerminalInput);
+our @EXPORT_OK = qw(minIndex getTerminalInput getDate);
 
 sub minIndex {
 	my( $aref, $idx_min ) = ( shift, 0 );
@@ -27,4 +27,13 @@ sub getTerminalInput {
             return $input;
         }
     }
+}
+
+sub getDate {
+    my ($self) = @_;
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+    my $timestamp   = sprintf ( "%04d%02d%02d %02d:%02d:%02d",$year+1900,$mon+1,$mday,$hour,$min,$sec);
+	$timestamp     =~ s/\s+/_/g;
+	$timestamp     =~ s/://g;
+    return $timestamp;
 }
