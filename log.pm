@@ -25,7 +25,7 @@ sub new {
     };
     my $blessed = bless($this,ref($class) || $class);
 	my $rV = $blessed->{logrewrite} eq "yes" ? ">" : ">>";
-	if($blessed->{logfile} != 0) {
+	if($blessed->{logsize} != 0) {
 		my $fileSize = (stat $blessed->{logfile})[7];
 		if($fileSize >= $blessed->{logsize}) {
 			copy("$blessed->{logfile}","_$blessed->{logfile}") or warn "Failed to copy logfile!";
