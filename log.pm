@@ -19,20 +19,21 @@ sub new {
     my $this = {
 		logfile => $logfile,
 		loglevel => $loglevel || 3,
-		logsize => $logsize || 2048,
+		logsize => $logsize || 0,
 		logrewrite => $logrewrite || 'yes',
 		fh => undef
     };
     my $blessed = bless($this,ref($class) || $class);
 	my $rV = $blessed->{logrewrite} eq "yes" ? ">" : ">>";
-	my $fileSize = (stat $blessed->{logfile})[7];
-	if($fileSize >= $blessed->{logsize}) {
-		copy("$blessed->{logfile}","_$blessed->{logfile}") or warn "Failed to copy logfile!";
-		$rV = ">";
+	if($blessed->{logfile} != 0) {
+		my $fileSize = (stat $blessed->{logfile})[7];
+		if($fileSize >= $blessed->{logsize}) {
+			copy("$blessed->{logfile}","_$blessed->{logfile}") or warn "Failed to copy logfile!";
+			$rV = ">";
+		}
 	}
 	open ($this->{fh},"$rV","$logfile");
-	$blessed->print("New console instance with path $logfile!");
-	$blessed->print("File size => $fileSize");
+	$blessed->print("New console class created with logfile as => $logfile!",5);
 	return $blessed;
 }
 
@@ -89,7 +90,9 @@ sub finalTime {
 	my ($self,$timer) = @_;
 	my $FINAL_TIME  = sprintf("%.2f", time() - $timer);
     my $Minute      = sprintf("%.2f", $FINAL_TIME / 60);
-    $self->print("Final execution time = $FINAL_TIME second(s) [$Minute minutes]!");
+	$self->print('---------------------------------------',5);
+    $self->print("Final execution time = $FINAL_TIME second(s) [$Minute minutes]!",5);
+	$self->print('---------------------------------------',5);
 }
 
 sub copyTo {
