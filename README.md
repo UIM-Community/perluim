@@ -72,10 +72,11 @@ if($RC == NIME_OK) {
 
 - Better UMP class (to do action on the REST API, and switch UMP if needed, HTTP request etc..). 
 - Support for daemon probe (not really supported by main right now...)
+- Map all supported probes as .PM class with all callbacks as method with clear arguments.
 
 > Feel free to pull-request a new class etc...
 
 # Roadmap 
 
 - Continue to work on documentation.
-- Rework main class (better instanciating/configuration syntax).
+- Rework methods to support nimNamedRequest or nimRequest (local or remote)
