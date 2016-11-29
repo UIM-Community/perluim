@@ -7,21 +7,29 @@ use Nimbus::API;
 use Nimbus::PDS;
 use Nimbus::CFG;
 
+use Data::Dumper;
+
 sub new {
-    my ($class,$hash) = @_;
+    my ($class,$arr) = @_;
     my $this = {
-        message => $hash->{"message"},
-        severity => $hash->{"severity"} || 1,
-        token => $hash->{"token"},
-        subsystem => $hash->{"subsystem"}
+        message => @$arr[0],
+        severity => @$arr[3] || 1,
+        token => @$arr[1] || undef,
+        subsystem => @$arr[3] || undef
     };
     return bless($this,ref($class) || $class);
 }
 
 sub call {
-    my ($self,$message) = @_;
-    print "call alarms !\n";
-    my $final_msg = $message || $self->{message};
+    my ($self,$hashRef) = @_;
+    my $CopyMsg = $self->{message};
+    my @matches = ( $CopyMsg =~ /\$([A-Za-z]+)/g );
+    foreach (@matches) {
+        if(exists($hashRef->{"$_"})) {
+            $self->{message} =~ s/\$\Q$_/$hashRef->{$_}/g;
+        }
+    }
+    print "$self->{message}\n";
     my ($rc,$alarmid) = nimAlarm($self->{severity},$final_msg,$self->{subsystem},$self->{token});
     return $rc,$alarmid;
 }
@@ -32,16 +40,16 @@ package perluim::alarmsmanager;
 use Data::Dumper;
 
 sub new {
-    my ($class,$CFG) = @_;
+    my ($class,$CFG,$section) = @_;
     my %Alarms = ();
-    foreach my $key (keys %{$CFG}) {
-        my %SubHash = (
-            message => %{$CFG}->{$key}->{"message"},
-            token => %{$CFG}->{$key}->{"i18n_token"},
-            severity => %{$CFG}->{$key}->{"severity"},
-            subsystem => %{$CFG}->{$key}->{"subsystem"}
+    foreach my $key (keys $CFG->{"$section"}) {
+        my @Arr = (
+            $CFG->{"$section"}->{$key}->{"message"},
+            $CFG->{"$section"}->{$key}->{"i18n_token"},
+            $CFG->{"$section"}->{$key}->{"severity"},
+            $CFG->{"$section"}->{$key}->{"subsystem"}
         );
-        $Alarms{$key} = new perluim::alarmstask(\%SubHash);
+        $Alarms{$key} = new perluim::alarmstask(\@Arr);
     }
     my $this = {
         alarms => \%Alarms
@@ -50,9 +58,11 @@ sub new {
 }
 
 sub call {
-    my ($self,$alarmName,$msg) = @_;
+    my $self = shift;
+    my $alarmName = shift;
+    my $hash = shift;
     if( defined($self->{alarms}->{$alarmName}) ) {
-        return $self->{alarms}->{$alarmName}->call($msg);
+        return $self->{alarms}->{$alarmName}->call($hash);
     }
     return 1,undef;
 }
