@@ -10,12 +10,13 @@ use Nimbus::CFG;
 use Data::Dumper;
 
 sub new {
-    my ($class,$arr) = @_;
+    my ($class,$name,$arr) = @_;
     my $this = {
+        name => $name,
         message => @$arr[0],
         severity => @$arr[3] || 1,
         token => @$arr[1] || undef,
-        subsystem => @$arr[3] || undef
+        subsystem => @$arr[3] || "1."
     };
     return bless($this,ref($class) || $class);
 }
@@ -23,14 +24,13 @@ sub new {
 sub call {
     my ($self,$hashRef) = @_;
     my $CopyMsg = $self->{message};
-    my @matches = ( $CopyMsg =~ /\$([A-Za-z]+)/g );
+    my @matches = ( $CopyMsg =~ /\$([A-Za-z0-9]+)/g );
     foreach (@matches) {
         if(exists($hashRef->{"$_"})) {
             $self->{message} =~ s/\$\Q$_/$hashRef->{$_}/g;
         }
     }
-    print "$self->{message}\n";
-    my ($rc,$alarmid) = nimAlarm($self->{severity},$final_msg,$self->{subsystem},$self->{token});
+    my ($rc,$alarmid) = nimAlarm($self->{severity},$final_msg,$self->{subsystem});
     return $rc,$alarmid;
 }
 
@@ -49,7 +49,7 @@ sub new {
             $CFG->{"$section"}->{$key}->{"severity"},
             $CFG->{"$section"}->{$key}->{"subsystem"}
         );
-        $Alarms{$key} = new perluim::alarmstask(\@Arr);
+        $Alarms{$key} = new perluim::alarmstask($key,\@Arr);
     }
     my $this = {
         alarms => \%Alarms
