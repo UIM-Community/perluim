@@ -26,7 +26,7 @@ sub new {
     }
     my $this = {
         name        => $o->get("name") || $o->get("hubname"),
-        robotname   => $o->get("robotname") || $addrArray[4] || "undefined",
+        robotname   => $o->get("robotname") || $addrArray[3] || "undefined",
         addr        => $o->get("addr") || $o->get("hubaddr"),
         domain      => $o->get("domain"),
         ip          => $o->get("ip") || $o->get("hubip"),
@@ -68,6 +68,23 @@ sub getRobots {
         pdsPut_PCH($PDS,"name","$robotname");
     }
     my ($RC,$NMS_RES) = nimNamedRequest("$self->{addr}","getrobots",$PDS,10);
+    pdsDelete($PDS);
+
+    if($RC == NIME_OK) {
+        return $RC,Nimbus::PDS->new($NMS_RES);
+    }
+    else {
+        return $RC,undef;
+    }
+}
+
+sub getLocalRobots {
+    my ($self,$robotname) = @_;
+    my $PDS = pdsCreate();
+    if(defined($robotname)) {
+        pdsPut_PCH($PDS,"name","$robotname");
+    }
+    my ($RC,$NMS_RES) = nimRequest("$self->{robotname}",48002,"getrobots",$PDS,10);
     pdsDelete($PDS);
 
     if($RC == NIME_OK) {
@@ -258,8 +275,8 @@ sub local_probeList {
     if(defined($probeName)) {
         pdsPut_PCH($PDS,"name","$probeName");
     }
-    my $FilterADDR = substr($self->{addr},0,-4);
-    my ($RC,$NMS_RES) = nimRequest("$FilterADDR/controller",48000,"probe_list",$PDS,10);
+    print "$self->{robotname} \n";
+    my ($RC,$NMS_RES) = nimRequest("$self->{robotname}",48000,"probe_list",$PDS,10);
     pdsDelete($PDS);
 
     if($RC == NIME_OK) {
