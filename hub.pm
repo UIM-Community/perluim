@@ -252,4 +252,26 @@ sub probeList {
     return $RC,undef;
 }
 
+sub local_probeList {
+    my ($self,$probeName) = @_;
+    my $PDS = pdsCreate();
+    if(defined($probeName)) {
+        pdsPut_PCH($PDS,"name","$probeName");
+    }
+    my $FilterADDR = substr($self->{addr},0,-4);
+    my ($RC,$NMS_RES) = nimRequest("$FilterADDR/controller",48000,"probe_list",$PDS,10);
+    pdsDelete($PDS);
+
+    if($RC == NIME_OK) {
+        my $Hash = Nimbus::PDS->new($NMS_RES)->asHash();
+        my @Probes;
+        foreach my $probe (keys %{$Hash}) {
+            my $Iprobe = new perluim::probe($probe,$Hash,$self->{addr});
+            push(@Probes,$Iprobe);
+        }
+        return $RC,@Probes
+    }
+    return $RC,undef;
+}
+
 1;
