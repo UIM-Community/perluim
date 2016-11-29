@@ -14,7 +14,7 @@ sub new {
     my $this = {
         name => $name,
         message => @$arr[0],
-        severity => @$arr[3] || 1,
+        severity => @$arr[2] || 1,
         token => @$arr[1] || undef,
         subsystem => @$arr[3] || "1."
     };
