@@ -91,11 +91,31 @@ sub getAllRobots {
     return %LIST_ROBOTS;
 }
 
-sub getLocalHub {
+sub getHub {
     my ($self) = @_;
 
     my $PDS = pdsCreate();
     my ($RC,$NMS_RES) = nimNamedRequest("hub","get_info",$PDS,1);
+    pdsDelete($PDS);
+
+    if($RC == NIME_OK) {
+        my $RobotNFO = Nimbus::PDS->new($NMS_RES)->asHash();
+        my $PDS = new Nimbus::PDS();
+        foreach my $key (keys $RobotNFO) {
+            $PDS->put($key,$RobotNFO->{$key},PDS_PCH);
+        }
+        return $RC,new perluim::hub($PDS);
+    }
+    else {
+        return $RC,undef;
+    }
+}
+
+sub getLocalHub {
+    my ($self) = @_;
+
+    my $PDS = pdsCreate();
+    my ($RC,$NMS_RES) = nimRequest("hub",48000,"get_info",$PDS,1);
     pdsDelete($PDS);
 
     if($RC == NIME_OK) {
