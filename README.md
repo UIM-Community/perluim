@@ -1,5 +1,5 @@
 # perluim
-CA UIM perl object-oriented framework. This framework is used in 10+ probes for BNPP infrastructure.
+CA UIM perl object-oriented framework.
 
 > Warning : Think to update librairies path in each .pm file.
 
