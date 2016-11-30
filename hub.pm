@@ -84,15 +84,18 @@ sub getLocalRobots {
     if(defined($robotname)) {
         pdsPut_PCH($PDS,"name","$robotname");
     }
-    my ($RC,$NMS_RES) = nimRequest("$self->{robotname}",48002,"getrobots",$PDS,10);
+    my ($RC,$NMS_RES) = nimRequest("$self->{name}",48002,"getrobots",$PDS,10);
     pdsDelete($PDS);
 
+    my @RobotsList = ();
     if($RC == NIME_OK) {
-        return $RC,Nimbus::PDS->new($NMS_RES);
+        my $ROBOTS_PDS = Nimbus::PDS->new($NMS_RES);
+        for( my $count = 0; my $ROBOTNFO = $ROBOTS_PDS->getTable("robotlist",PDS_PDS,$count); $count++) {
+            my $ROBOT = new perluim::robot($ROBOTNFO);
+            push(@RobotsList,$ROBOT);
+        }
     }
-    else {
-        return $RC,undef;
-    }
+    return $RC,@RobotsList;
 }
 
 #
