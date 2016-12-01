@@ -23,16 +23,18 @@ sub new {
 
 sub call {
     my ($self,$hashRef) = @_;
+    my $finalMsg = $self->{message};
     my $CopyMsg = $self->{message};
     my @matches = ( $CopyMsg =~ /\$([A-Za-z0-9]+)/g );
     foreach (@matches) {
         if(exists($hashRef->{"$_"})) {
-            $self->{message} =~ s/\$\Q$_/$hashRef->{$_}/g;
+            $finalMsg =~ s/\$\Q$_/$hashRef->{$_}/g;
         }
     }
-    my ($rc,$alarmid) = nimAlarm($self->{severity},$final_msg,$self->{subsystem});
+    my ($rc,$alarmid) = nimAlarm($self->{severity},$finalMsg,$self->{subsystem},undef);
     return $rc,$alarmid;
 }
+
 
 
 package perluim::alarmsmanager;
