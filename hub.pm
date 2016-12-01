@@ -47,7 +47,9 @@ sub new {
         uptime      => $o->get("uptime") || 0,
         started     => $o->get("started") || 0
     };
-    return bless($this,ref($class) || $class);
+    my $blessed = bless($this,ref($class) || $class);
+    $blessed->{clean_addr} = substr($blessed->{addr},0,-4);
+    return $blessed;
 }
 
 sub removeRobot {
@@ -148,8 +150,7 @@ sub getEnv {
     if(defined($var)) {
         pdsPut_PCH ($PDS,"variable","$var");
     }
-    my $clean_addr = substr($self->{addr},0,-4);
-    my ($RC,$RES) = nimNamedRequest("$clean_addr/controller","get_environment",$PDS,10);
+    my ($RC,$RES) = nimNamedRequest("$self->{clean_addr}/controller","get_environment",$PDS,10);
     pdsDelete($PDS);
 
     if($RC == NIME_OK) {
@@ -163,8 +164,7 @@ sub getInfo {
     my ($self) = @_;
 
     my $PDS = pdsCreate();
-    my $clean_addr = substr($self->{addr},0,-4);
-    my ($RC,$RES) = nimNamedRequest("$clean_addr/controller","get_info",$PDS,10);
+    my ($RC,$RES) = nimNamedRequest("$self->{clean_addr}/controller","get_info",$PDS,10);
     pdsDelete($PDS);
 
     if($RC == NIME_OK) {
@@ -244,8 +244,7 @@ sub probeVerify {
     my ($self,$probeName) = @_;
     my $PDS = pdsCreate();
     pdsPut_PCH($PDS,"name","automated_deployment_engine");
-    my $FilterADDR = substr($self->{addr},0,-4);
-    my ($RC,$NMS_RES) = nimNamedRequest("$FilterADDR/controller","probe_verify",$PDS,10);
+    my ($RC,$NMS_RES) = nimNamedRequest("$self->{clean_addr}/controller","probe_verify",$PDS,10);
     pdsDelete($PDS);
     return $RC;
 }
@@ -256,8 +255,7 @@ sub probeList {
     if(defined($probeName)) {
         pdsPut_PCH($PDS,"name","$probeName");
     }
-    my $FilterADDR = substr($self->{addr},0,-4);
-    my ($RC,$NMS_RES) = nimNamedRequest("$FilterADDR/controller","probe_list",$PDS,10);
+    my ($RC,$NMS_RES) = nimNamedRequest("$self->{clean_addr}/controller","probe_list",$PDS,10);
     pdsDelete($PDS);
 
     if($RC == NIME_OK) {
@@ -278,7 +276,6 @@ sub local_probeList {
     if(defined($probeName)) {
         pdsPut_PCH($PDS,"name","$probeName");
     }
-    print "$self->{robotname} \n";
     my ($RC,$NMS_RES) = nimRequest("$self->{robotname}",48000,"probe_list",$PDS,10);
     pdsDelete($PDS);
 
