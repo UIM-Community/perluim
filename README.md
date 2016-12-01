@@ -3,6 +3,10 @@ CA UIM perl object-oriented framework.
 
 > Warning : Think to update librairies path in each .pm file.
 
+# Probes 
+
+- Selfmonitoring - [Link](https://github.com/fraxken/selfmonitoring)
+
 # Introduction 
 
 ```perl
