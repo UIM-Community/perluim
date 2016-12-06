@@ -320,6 +320,18 @@ sub probeActivate {
 	return $RC;
 }
 
+sub removeProbe {
+	my ($self,$packageName,$probeName) = @_;
+
+	my $args = pdsCreate();
+    pdsPut_PCH($args, "package", $packageName);
+    pdsPut_PCH($args, "probe", $probeName);
+    my ($RC, $RES) = nimNamedRequest("$self->{addr}/controller", "inst_pkg_remove", $args, 10);
+    pdsDelete($args);
+
+	return $RC;
+}
+
 sub updateOrigin {
 	my ($self, $value) = @_;
 	my $PDS = pdsCreate();
