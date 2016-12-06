@@ -89,3 +89,4 @@ if($RC == NIME_OK) {
 - Continue to work on documentation.
 - Rework methods to support nimNamedRequest or nimRequest (local or remote)
 - Support level 1 for daemon probe.
+- Archive class to support distsrv callback too!
