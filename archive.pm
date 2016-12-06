@@ -13,19 +13,23 @@ sub new {
     my ($class,$hub) = @_;
     my $this = {
         hub => $hub,
-        cleanAddr => substr($hub->{addr},0,-4)
+        cleanAddr => substr($hub->{addr},0,-4),
+        cb_support => "ade"
     };
     return bless($this,ref($class) || $class);
 }
 
 sub getPackages {
-    my ($self,$name,$version) = @_;
+    my ($self,$name,$version,$distsrv) = @_;
     my $PDS = pdsCreate();
     if(defined($name)) {
         pdsPut_PCH($PDS,"name","$name");
     }
     if(defined($version)) {
         pdsPut_PCH($PDS,"version","$version");
+    }
+    if($self->{cb_support} eq "distsrv" or $distsrv) {
+        pdsPut_INT($PDS,"detail_level",1);
     }
     my ($RC,$NMS_RES) = nimNamedRequest("$self->{cleanAddr}/automated_deployment_engine","archive_list",$PDS,10);
     pdsDelete($PDS);
