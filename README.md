@@ -6,6 +6,7 @@ CA UIM perl object-oriented framework.
 # Probes 
 
 - Selfmonitoring - [Link](https://github.com/fraxken/selfmonitoring)
+- Archive_cleaner - [Link](https://github.com/fraxken/archive_cleaner)
 
 # Introduction 
 
