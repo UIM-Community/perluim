@@ -77,15 +77,9 @@ if($RC == NIME_OK) {
 - First step to work with UIM Rest (Need more work on this part..) 
 - Better logs
 
-# Contribution welcome 
-
-- Better UMP class (to do action on the REST API, and switch UMP if needed, HTTP request etc..). 
-- Map all supported probes as .PM class with all callbacks as method with clear arguments.
-
 > Feel free to pull-request a new class etc...
 
-# Roadmap 
+# Roadmap for next releases
 
-- Continue to work on documentation.
 - Rework methods to support nimNamedRequest or nimRequest (local or remote)
-- Support level 1 for daemon probe.
+- Support bridge for session probe
