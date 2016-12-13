@@ -1,18 +1,25 @@
-# perluim
+# Perluim
 CA UIM perl object-oriented framework.
 
 > Warning : Think to update librairies path in each .pm file.
 
+This framework has been created to help developer to work with the Perl SDK of CA UIM. It bring to you a default OO structure with a lot of callback or generic and useful methods.
+
 # Probes (R2.0+)
 
-- Selfmonitoring - [Link](https://github.com/fraxken/selfmonitoring)
-- Archive_cleaner - [Link](https://github.com/fraxken/archive_cleaner)
-- Robots_checker - [Link](https://github.com/fraxken/robots_checker/tree/master)
-- Checkconfig - Not updated for this version of the framework.
+- Selfmonitoring    - [Link](https://github.com/fraxken/selfmonitoring)
+- Archive_cleaner   - [Link](https://github.com/fraxken/archive_cleaner)
+- Robots_checker    - [Link](https://github.com/fraxken/robots_checker/tree/master)
 - Alarms_management - [Link](https://github.com/fraxken/Alarms_management)
-- Netconnect_ha - [Link](https://github.com/fraxken/netconnect_ha)
+- Netconnect_ha     - [Link](https://github.com/fraxken/netconnect_ha)
 - Archive_inventory - [Link](https://github.com/fraxken/archive_inventory)
-- ump_management - [Link](https://github.com/fraxken/ump_management) (Rework of UMP_ha 3). 
+- ump_management    - [Link](https://github.com/fraxken/ump_management) (Rework of UMP_ha 3). 
+
+# Probes comming 
+
+- ADE_Deployment (automatic deployment with ADE) 
+- Checkconfig3 - Rework with perluim.
+- Checkconfig4 - Rework of checkconfig2 with perluim. 
 
 # Introduction 
 
