@@ -10,6 +10,7 @@ CA UIM perl object-oriented framework.
 - Robots_checker - [Link](https://github.com/fraxken/robots_checker/tree/master)
 - Checkconfig - Not updated for this version of the framework.
 - Alarms_management - [Link](https://github.com/fraxken/Alarms_management)
+- Netconnect_ha - [Link](https://github.com/fraxken/netconnect_ha)
 - Archive_inventory - Comming soon. 
 - ump_management - Comming soon (Rework of UMP_ha 3.X). 
 
