@@ -3,7 +3,7 @@ CA UIM perl object-oriented framework.
 
 > Warning : Think to update librairies path in each .pm file.
 
-# Probes 
+# Probes (R2.0+)
 
 - Selfmonitoring - [Link](https://github.com/fraxken/selfmonitoring)
 - Archive_cleaner - [Link](https://github.com/fraxken/archive_cleaner)
@@ -71,6 +71,8 @@ if($RC == NIME_OK) {
     }
 }
 ```
+
+Find documentation API [Here](https://github.com/fraxken/perluim/wiki)
 
 # Features 
 
