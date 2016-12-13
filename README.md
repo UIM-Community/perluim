@@ -11,7 +11,7 @@ CA UIM perl object-oriented framework.
 - Checkconfig - Not updated for this version of the framework.
 - Alarms_management - [Link](https://github.com/fraxken/Alarms_management)
 - Netconnect_ha - [Link](https://github.com/fraxken/netconnect_ha)
-- Archive_inventory - Comming soon. 
+- Archive_inventory - [Link](https://github.com/fraxken/archive_inventory)
 - ump_management - Comming soon (Rework of UMP_ha 3.X). 
 
 # Introduction 
