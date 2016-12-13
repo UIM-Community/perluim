@@ -7,6 +7,7 @@ CA UIM perl object-oriented framework.
 
 - Selfmonitoring - [Link](https://github.com/fraxken/selfmonitoring)
 - Archive_cleaner - [Link](https://github.com/fraxken/archive_cleaner)
+- Robots_checker - [Link](https://github.com/fraxken/robots_checker/tree/master)
 - Checkconfig - Not updated for this version of the framework.
 - Alarms_management - [Link](https://github.com/fraxken/Alarms_management)
 - Archive_inventory - Comming soon. 
