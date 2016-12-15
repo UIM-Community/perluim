@@ -4,6 +4,7 @@ use warnings;
 use File::Copy;
 use File::Stat;
 use File::Path 'rmtree';
+use IO::Handle;
 
 our %Log_level = (
 	0 => "[CRITICAL]",
@@ -11,8 +12,7 @@ our %Log_level = (
 	2 => "[WARNING] ",
 	3 => "[INFO]    ",
 	4 => "[DEBUG]   ",
-	5 => "          ",
-	6 => "[SUCCESS] "
+	5 => "          "
 );
 
 sub new {
@@ -66,6 +66,7 @@ sub print {
 		my $filehandler = $self->{fh};
 		print $filehandler "$date $Log_level{$loglevel} - $logmsg\n";
 		print "$date $Log_level{$loglevel} - $logmsg\n";
+		$filehandler->autoflush;
 	}
 }
 
@@ -92,13 +93,13 @@ sub finalTime {
 	my $FINAL_TIME  = sprintf("%.2f", time() - $timer);
     my $Minute      = sprintf("%.2f", $FINAL_TIME / 60);
 	$self->print('---------------------------------------',5);
-    $self->print("Final execution time = $FINAL_TIME second(s) [$Minute minutes]!",5);
+    $self->print("Execution time = $FINAL_TIME second(s) [$Minute minutes]!",5);
 	$self->print('---------------------------------------',5);
 }
 
 sub copyTo {
 	my ($self,$path) = @_;
-	$self->close();
 	copy("$self->{logfile}","$path/$self->{logfile}") or warn "Failed to copy logfile!";
 }
+
 1;
