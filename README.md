@@ -5,7 +5,7 @@ CA UIM perl object-oriented framework.
 
 This framework has been created to help developer to work with the Perl SDK of CA UIM. It bring to you a default OO structure with a lot of callback or generic and useful methods.
 
-# Probes (R2.0+)
+# Probes (R2.0)
 
 - Selfmonitoring    - [Link](https://github.com/fraxken/selfmonitoring)
 - Archive_cleaner   - [Link](https://github.com/fraxken/archive_cleaner)
@@ -14,6 +14,8 @@ This framework has been created to help developer to work with the Perl SDK of C
 - Netconnect_ha     - [Link](https://github.com/fraxken/netconnect_ha)
 - Archive_inventory - [Link](https://github.com/fraxken/archive_inventory)
 - ump_management    - [Link](https://github.com/fraxken/ump_management) (Rework of UMP_ha 3). 
+
+> Warning : Use the release R2.0, dont use latest commits that correspond to the next R3.0
 
 # Probes comming 
 
