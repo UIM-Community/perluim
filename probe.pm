@@ -142,6 +142,22 @@ sub setKey {
     return $RC;
 }
 
+sub local_setKey {
+    my ($self,$section,$key,$value) = @_;
+
+    my $PDS_args = pdsCreate();
+    pdsPut_PCH ($PDS_args,"name","$self->{name}");
+    pdsPut_PCH ($PDS_args,"section","$section");
+    pdsPut_PCH ($PDS_args,"key","$key");
+    pdsPut_PCH ($PDS_args,"value","$value");
+    pdsPut_PCH ($PDS_args,"robot","1");
+
+    my ($RC, $O) = nimRequest("$self->{robotname}",48000, "probe_config_set", $PDS_args,3);
+    pdsDelete($PDS_args);
+
+    return $RC;
+}
+
 sub getKey {
     my ($self,$var) = @_;
 
@@ -166,5 +182,31 @@ sub getKey {
     }
     return $RC,undef;
 }
+
+sub local_getKey {
+    my ($self,$var) = @_;
+
+    my $PDS_args = pdsCreate();
+    pdsPut_PCH ($PDS_args,"name","$self->{name}");
+    if(defined($var)) {
+        pdsPut_PCH ($PDS_args,"var","$var");
+    }
+
+    my ($RC, $RES) = nimRequest("$self->{robotname}", 48000, "probe_config_get", $PDS_args,3);
+    pdsDelete($PDS_args);
+
+    if($RC == NIME_OK) {
+        if(defined($var)) {
+            my $value = (Nimbus::PDS->new($RES))->get("value");
+            return $RC,$value;
+        }
+        else {
+            my $Hash = Nimbus::PDS->new($RES)->asHash();
+            return $RC,$Hash;
+        }
+    }
+    return $RC,undef;
+}
+
 
 1;
