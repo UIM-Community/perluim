@@ -80,15 +80,19 @@ sub getLocalRobot {
 
 sub getAllRobots {
     my ($self) = @_;
-    my @LIST_HUB        = $self->getArrayHubs();
-    my %LIST_ROBOTS     = ();
-    foreach my $hub (@LIST_HUB) {
-        my @ROBOTS = $hub->getArrayRobots();
-        foreach my $robot (@ROBOTS) {
-            $LIST_ROBOTS{lc $robot->{name}} = $robot;
+    my ($RC_Hub,@LIST_HUB) = $self->getArrayHubs();
+    if($RC_Hub == NIME_OK) {
+        my %LIST_ROBOTS     = ();
+        foreach my $hub (@LIST_HUB) {
+            my ($RC,@ROBOTS) = $hub->getArrayRobots();
+            next if $RC != NIME_OK;
+            foreach my $robot (@ROBOTS) {
+                $LIST_ROBOTS{lc $robot->{name}} = $robot;
+            }
         }
+        return $RC_Hub,%LIST_ROBOTS;
     }
-    return %LIST_ROBOTS;
+    return $RC_Hub,undef;
 }
 
 sub getLocalHub {
