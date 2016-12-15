@@ -43,15 +43,22 @@ sub loadString {
 }
 
 sub save {
-    my ($self,$output,$Array) = @_;
+    my ($self,$output,$Array,$ObjectKey) = @_;
     if(defined($Array)) {
         my $file_handler;
         unless(open($file_handler,">", "$output")) {
             warn "Unabled to open rejected_files \n";
             return;
         }
-        foreach(@{ $Array }) {
-            print $file_handler "$_\n";
+        if(defined $ObjectKey) {
+            foreach(@{ $Array }) {
+                print $file_handler "$_->{$ObjectKey}\n";
+            }
+        }
+        else {
+            foreach(@{ $Array }) {
+                print $file_handler "$_\n";
+            }
         }
         close $file_handler;
     }
