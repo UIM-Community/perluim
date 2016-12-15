@@ -74,7 +74,7 @@ sub getInfo {
     return $RC;
 }
 
-sub getLocalInfo {
+sub local_getInfo {
     my ($self) = @_;
     my $PDS = pdsCreate();
     my ($RC,$NMS_RES) = nimRequest("$self->{name}",48000,"get_info",$PDS,1);
@@ -96,7 +96,32 @@ sub getLocalInfo {
     return $RC;
 }
 
-sub getLocalHub {
+sub getHub {
+    my ($self) = @_;
+
+    my $PDS = pdsCreate();
+    my ($RC,$NMS_RES) = nimNamedRequest("$self->{addr}/controller","gethub",$PDS,1);
+    pdsDelete($PDS);
+
+    if($RC == NIME_OK) {
+        my $RobotNFO = Nimbus::PDS->new($NMS_RES)->asHash();
+        $self->{phub_domain}        = $RobotNFO->{phub_domain} || "NMS-PROD";
+        $self->{phub_name}          = $RobotNFO->{phub_name} || "";
+        $self->{phub_robotname}     = $RobotNFO->{phub_robotname} || "";
+        $self->{phub_ip}            = $RobotNFO->{phub_ip} || "";
+        $self->{phub_dns_name}      = $RobotNFO->{phub_dns_name} || $RobotNFO->{phub_name} || "";
+        $self->{phub_port}          = $RobotNFO->{phub_port} || 48002;
+        $self->{shub_domain}        = $RobotNFO->{shub_domain} || "NMS-PROD";
+        $self->{shub_name}          = $RobotNFO->{shub_name} || "";
+        $self->{shub_robotname}     = $RobotNFO->{shub_robotname} || "";
+        $self->{shub_ip}            = $RobotNFO->{shub_ip} || "";
+        $self->{shub_dns_name}      = $RobotNFO->{shub_dns_name} || $RobotNFO->{shub_name} || "";
+        $self->{shub_port}          = $RobotNFO->{shub_port} || 48002;
+    }
+    return $RC,undef;
+}
+
+sub local_getHub {
     my ($self) = @_;
     my $PDS = pdsCreate();
     my ($RC,$NMS_RES) = nimRequest("$self->{name}",48000,"gethub",$PDS,1);
@@ -119,7 +144,7 @@ sub getLocalHub {
     return $RC;
 }
 
-sub getHub {
+sub getHashHub {
     my ($self) = @_;
 
     my $PDS = pdsCreate();
@@ -133,7 +158,7 @@ sub getHub {
     return $RC,undef;
 }
 
-sub getPackages {
+sub packagesArray {
     my ($self) = @_;
 
     my $PDS = pdsCreate();
@@ -151,7 +176,7 @@ sub getPackages {
     return $RC,@PackagesList;
 }
 
-sub getLocalPackages {
+sub local_packagesArray {
     my ($self) = @_;
 
     my $PDS = pdsCreate();
@@ -171,7 +196,7 @@ sub getLocalPackages {
     return $RC,@PackagesList;
 }
 
-sub getArrayProbes {
+sub probesArray {
     my ($self) = @_;
 
     my $PDS = pdsCreate();
@@ -191,7 +216,7 @@ sub getArrayProbes {
     return $RC,undef;
 }
 
-sub getLocalArrayProbes {
+sub local_probesArray {
     my ($self) = @_;
 
     my @ProbesArray = ();
@@ -235,6 +260,44 @@ sub getRobotCFG {
     return $RC;
 }
 
+sub local_getRobotCFG {
+    my ($self,$filepath) = @_;
+
+    my $PDS_args = pdsCreate();
+    pdsPut_PCH ($PDS_args,"directory","robot");
+    pdsPut_PCH ($PDS_args,"file","robot.cfg");
+    pdsPut_INT ($PDS_args,"buffer_size",10000000);
+
+    my ($RC, $ProbePDS_CFG) = nimRequest("$self->{name}",48000, "text_file_get", $PDS_args,3);
+    pdsDelete($PDS_args);
+
+    if($RC == NIME_OK) {
+        my $CFG_Handler;
+        unless(open($CFG_Handler,">","$filepath/robot_$self->{name}_.cfg")) {
+            warn "\nUnable to create configuration file for robot probe on path $filepath\n";
+            return 1;
+        }
+        my @ARR_CFG_Config = Nimbus::PDS->new($ProbePDS_CFG)->asHash();
+        print $CFG_Handler $ARR_CFG_Config[0]{'file_content'};
+        close $CFG_Handler;
+        return $RC;
+    }
+    return $RC;
+}
+
+sub scanRobotCFG {
+    my ($self,$filepath,$key,$expected_value) = @_;
+
+    my $CFG = Nimbus::CFG->new("$filepath/robot_$self->{name}_.cfg");
+    if(defined($CFG->{'controller'}->{"$key"})) {
+        my $cfg_hubdomain_value = $CFG->{'controller'}->{"$key"};
+        if($cfg_hubdomain_value ne $expected_value) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 sub probeConfig_set {
     my ($self,$probeName,$section,$key,$value) = @_;
 
@@ -246,6 +309,22 @@ sub probeConfig_set {
     pdsPut_PCH ($PDS_args,"robot","1");
 
     my ($RC, $O) = nimNamedRequest("$self->{addr}/controller", "probe_config_set", $PDS_args,3);
+    pdsDelete($PDS_args);
+
+    return $RC;
+}
+
+sub local_probeConfig_set {
+    my ($self,$probeName,$section,$key,$value) = @_;
+
+    my $PDS_args = pdsCreate();
+    pdsPut_PCH ($PDS_args,"name","$probeName");
+    pdsPut_PCH ($PDS_args,"section","$section");
+    pdsPut_PCH ($PDS_args,"key","$key");
+    pdsPut_PCH ($PDS_args,"value","$value");
+    pdsPut_PCH ($PDS_args,"robot","1");
+
+    my ($RC, $O) = nimRequest("$self->{name}",48000, "probe_config_set", $PDS_args,3);
     pdsDelete($PDS_args);
 
     return $RC;
@@ -276,6 +355,31 @@ sub probeConfig_get {
     return $RC,undef;
 }
 
+sub local_probeConfig_get {
+    my ($self,$probeName,$var) = @_;
+
+    my $PDS_args = pdsCreate();
+    pdsPut_PCH ($PDS_args,"name","$probeName");
+    if(defined($var)) {
+        pdsPut_PCH ($PDS_args,"var","$var");
+    }
+
+    my ($RC, $RES) = nimRequest("$self->{name}",48000, "probe_config_get", $PDS_args);
+    pdsDelete($PDS_args);
+
+    if($RC == NIME_OK) {
+        if(defined($var)) {
+            my $value = (Nimbus::PDS->new($RES))->get("value");
+            return $RC,$value;
+        }
+        else {
+            my $Hash = Nimbus::PDS->new($RES)->asHash();
+            return $RC,$Hash;
+        }
+    }
+    return $RC,undef;
+}
+
 sub probeExist {
     my ($self,$probeName) = @_;
 
@@ -291,9 +395,31 @@ sub probeExist {
     return $RC,undef;
 }
 
+sub local_probeExist {
+    my ($self,$probeName) = @_;
+
+    my $PDS = pdsCreate();
+	pdsPut_PCH($PDS,"name",$probeName);
+	my ($RC,$RES) = nimRequest( "$self->{name}",48000, "probe_list",$PDS,5);
+    pdsDelete($PDS);
+
+    if($RC == NIME_OK) {
+        my $Hash = Nimbus::PDS->new($RES)->asHash();
+        return $RC,$Hash->{"$probeName"};
+    }
+    return $RC,undef;
+}
+
+
 sub probeRestart {
     my ($self,$probeName) = @_;
 	my $RC = nimNamedRequest( "$self->{addr}/$probeName", "_restart");
+	return $RC;
+}
+
+sub local_probeRestart {
+    my ($self,$probePort) = @_;
+	my $RC = nimRequest( "$self->{name}",$probePort, "_restart");
 	return $RC;
 }
 
@@ -309,12 +435,13 @@ sub probeDeactivate {
 	return $RC;
 }
 
-sub probeActivate {
+sub local_probeDeactivate {
 	my ($self,$probeName) = @_;
 
 	my $PDS = pdsCreate();
 	pdsPut_PCH($PDS,"name",$probeName);
-	my ($RC,$OBJ) = nimNamedRequest( "$self->{addr}/controller", "probe_activate",$PDS,5);
+	pdsPut_INT($PDS,"noforce",1);
+	my ($RC,$OBJ) = nimRequest( "$self->{name}",48000, "probe_deactivate",$PDS,5);
     pdsDelete($PDS);
 
 	return $RC;
@@ -328,6 +455,40 @@ sub removeProbe {
     pdsPut_PCH($args, "probe", $probeName);
     my ($RC, $RES) = nimNamedRequest("$self->{addr}/controller", "inst_pkg_remove", $args, 10);
     pdsDelete($args);
+
+	return $RC;
+}
+
+sub local_removeProbe {
+	my ($self,$packageName,$probeName) = @_;
+
+	my $args = pdsCreate();
+    pdsPut_PCH($args, "package", $packageName);
+    pdsPut_PCH($args, "probe", $probeName);
+    my ($RC, $RES) = nimRequest("$self->{name}",48000, "inst_pkg_remove", $args, 10);
+    pdsDelete($args);
+
+	return $RC;
+}
+
+sub probeActivate {
+	my ($self,$probeName) = @_;
+
+	my $PDS = pdsCreate();
+	pdsPut_PCH($PDS,"name",$probeName);
+	my ($RC,$OBJ) = nimNamedRequest( "$self->{addr}/controller", "probe_activate",$PDS,5);
+    pdsDelete($PDS);
+
+	return $RC;
+}
+
+sub local_probeActivate {
+	my ($self,$probeName) = @_;
+
+	my $PDS = pdsCreate();
+	pdsPut_PCH($PDS,"name",$probeName);
+	my ($RC,$OBJ) = nimRequest( "$self->{name}", 48000 , "probe_activate",$PDS);
+    pdsDelete($PDS);
 
 	return $RC;
 }
@@ -482,6 +643,15 @@ sub cacheClean {
     my $PDS = pdsCreate();
     pdsPut_PCH ($PDS,"robot",$self->{name});
     my ($RC,$OBJ) = nimNamedRequest( "$self->{addr}/controller", "_nis_cache_clean",$PDS,2);
+    pdsDelete($PDS);
+    return $RC;
+}
+
+sub local_cacheClean {
+    my ($self) = @_;
+    my $PDS = pdsCreate();
+    pdsPut_PCH ($PDS,"robot",$self->{name});
+    my ($RC,$OBJ) = nimRequest( "$self->{name}",48000, "_nis_cache_clean",$PDS);
     pdsDelete($PDS);
     return $RC;
 }
