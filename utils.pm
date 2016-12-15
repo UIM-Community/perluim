@@ -10,7 +10,15 @@ use Nimbus::Session;
 use Nimbus::CFG;
 use Nimbus::PDS;
 
-our @EXPORT_OK = qw(minIndex getTerminalInput getDate);
+our @EXPORT_OK = qw(minIndex getTerminalInput getDate randomString);
+
+sub randomString {
+    my ($length) = @_; 
+    my @set = ('0' ..'9', 'A' .. 'F');
+    my $str = join '' => map $set[rand @set], 1 .. $length;
+    return $str;
+}
+
 
 sub minIndex {
 	my( $aref, $idx_min ) = ( shift, 0 );
