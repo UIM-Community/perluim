@@ -14,7 +14,6 @@ use perluim::hub;
 use perluim::robot;
 
 use Term::ANSIColor qw(:constants);
-use Win32::Console::ANSI;
 use Data::Dumper;
 use HTTP::Request;
 use LWP::UserAgent;
@@ -24,38 +23,9 @@ $Data::Dumper::Indent = 1;
 sub new {
     my ($class,$domain) = @_;
     my $this = {
-        domain => $domain,
-        user => undef,
-        password => undef,
-        console => undef
+        domain => $domain
     };
     return bless($this,ref($class) || $class);
-}
-
-sub setLog {
-    my ($self,$console) = @_;
-    $self->{console} = $console;
-}
-
-sub setAuthentification {
-    my ($self,$user,$password) = @_;
-    $self->{user} = $user;
-    $self->{password} = $password;
-}
-
-sub HTTP {
-    my ($self,$method,$URL) = @_;
-    my $request = HTTP::Request->new("$method" => "$URL");
-    $request->header( 'content-type' => 'application/json' );
-    $request->header( 'accept' => 'application/json' );
-    $request->authorization_basic( "$self->{user}", "$self->{password}" );
-    my $ua = LWP::UserAgent->new( ssl_opts => {
-        verify_hostname => 0,
-        SSL_verify_mode => 0x00
-    });
-    $ua->timeout(30);
-    my $response = $ua->request($request);
-    return $response
 }
 
 sub getLocalRobot {
@@ -99,7 +69,7 @@ sub getLocalHub {
     my ($self) = @_;
 
     my $PDS = pdsCreate();
-    my ($RC,$NMS_RES) = nimRequest("hub",48000,"get_info",$PDS,1);
+    my ($RC,$NMS_RES) = nimNamedRequest("hub","get_info",$PDS,1);
     pdsDelete($PDS);
 
     if($RC == NIME_OK) {
@@ -153,28 +123,6 @@ sub getHashHubs {
     else {
         return $RC,undef;
     }
-}
-
-sub createDirectory {
-    my ($self,$path) = @_;
-    my @dir = split("/",$path);
-    my $track = "";
-    foreach(@dir) {
-        my $path = $track.$_;
-        if( !(-d $path) ) {
-            mkdir($path) or die "Unable to create $_ directory!";
-        }
-        $track .= "$_/";
-    }
-}
-
-sub getDate {
-    my ($self) = @_;
-    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-    my $timestamp   = sprintf ( "%04d%02d%02d %02d:%02d:%02d",$year+1900,$mon+1,$mday,$hour,$min,$sec);
-	$timestamp     =~ s/\s+/_/g;
-	$timestamp     =~ s/://g;
-    return $timestamp;
 }
 
 sub getHashRobots {
@@ -242,13 +190,6 @@ sub getLocalArrayRobots {
         }
     }
     return $RC,@RobotsList;
-}
-
-sub doSleep {
-    my ($self,$sleepTime) = @_;
-    while($sleepTime--) {
-        sleep(1);
-    }
 }
 
 1;
