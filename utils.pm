@@ -21,7 +21,7 @@ sub doSleep {
 
 
 sub createDirectory {
-    my ($self,$path) = @_;
+    my ($path) = @_;
     my @dir = split("/",$path);
     my $track = "";
     foreach(@dir) {
