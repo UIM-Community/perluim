@@ -144,11 +144,25 @@ sub local_getHub {
     return $RC;
 }
 
-sub getHashHub {
+sub getHub_asHash {
     my ($self) = @_;
 
     my $PDS = pdsCreate();
-    my ($RC,$NMS_RES) = nimNamedRequest("$self->{addr}/controller","gethub",$PDS,1);
+    my ($RC,$NMS_RES) = nimNamedRequest("$self->{addr}/controller","gethub",$PDS);
+    pdsDelete($PDS);
+
+    if($RC == NIME_OK) {
+        my $RobotNFO = Nimbus::PDS->new($NMS_RES)->asHash();
+        return $RC,$RobotNFO;
+    }
+    return $RC,undef;
+}
+
+sub local_getHub_asHash {
+    my ($self) = @_;
+
+    my $PDS = pdsCreate();
+    my ($RC,$NMS_RES) = nimRequest("$self->{name}",48000,"gethub",$PDS);
     pdsDelete($PDS);
 
     if($RC == NIME_OK) {
