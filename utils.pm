@@ -10,7 +10,20 @@ use Nimbus::Session;
 use Nimbus::CFG;
 use Nimbus::PDS;
 
-our @EXPORT_OK = qw(minIndex getTerminalInput getDate randomString);
+our @EXPORT_OK = qw(minIndex getTerminalInput getDate randomString createDirectory);
+
+sub createDirectory {
+    my ($self,$path) = @_;
+    my @dir = split("/",$path);
+    my $track = "";
+    foreach(@dir) {
+        my $path = $track.$_;
+        if( !(-d $path) ) {
+            mkdir($path) or die "Unable to create $_ directory!";
+        }
+        $track .= "$_/";
+    }
+}
 
 sub randomString {
     my ($length) = @_; 
@@ -18,7 +31,6 @@ sub randomString {
     my $str = join '' => map $set[rand @set], 1 .. $length;
     return $str;
 }
-
 
 sub minIndex {
 	my( $aref, $idx_min ) = ( shift, 0 );
