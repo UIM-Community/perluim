@@ -54,7 +54,7 @@ sub getAllRobots {
     if($RC_Hub == NIME_OK) {
         my %LIST_ROBOTS     = ();
         foreach my $hub (@LIST_HUB) {
-            my ($RC,@ROBOTS) = $hub->getArrayRobots();
+            my ($RC,@ROBOTS) = $hub->robotsArray();
             next if $RC != NIME_OK;
             foreach my $robot (@ROBOTS) {
                 $LIST_ROBOTS{lc $robot->{name}} = $robot;
