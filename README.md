@@ -99,5 +99,6 @@ Find documentation API [Here](https://github.com/fraxken/perluim/wiki)
 
 # Roadmap for next releases
 
-- Rework methods to support nimNamedRequest or nimRequest (local or remote)
 - Support bridge for session probe
+- Starter guide (P1)
+- Implement latest missing features.
