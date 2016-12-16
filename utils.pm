@@ -10,7 +10,15 @@ use Nimbus::Session;
 use Nimbus::CFG;
 use Nimbus::PDS;
 
-our @EXPORT_OK = qw(minIndex getTerminalInput getDate randomString createDirectory);
+our @EXPORT_OK = qw(minIndex getTerminalInput getDate randomString createDirectory doSleep);
+
+sub doSleep {
+    my ($self,$sleepTime) = @_;
+    while($sleepTime--) {
+        sleep(1);
+    }
+}
+
 
 sub createDirectory {
     my ($self,$path) = @_;
