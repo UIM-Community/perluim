@@ -175,8 +175,8 @@ sub getInfo {
 }
 
 sub archive {
-    my ($self) = @_;
-    return new perluim::archive($self);
+    my ($self,$probePort) = @_;
+    return new perluim::archive($self,$probePort);
 }
 
 sub tunnelsList {
