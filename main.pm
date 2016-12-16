@@ -167,29 +167,4 @@ sub getArrayRobots {
     }
 }
 
-sub getLocalArrayRobots {
-    my ($self,$retry) = @_;
-    my $maxRetry = defined($retry) ? $retry : 1;
-    my @RobotsList = ();
-
-    my ($RC,$NMS_RES);
-    while($maxRetry--) {
-        my $PDS = pdsCreate();
-        ($RC,$NMS_RES) = nimNamedRequest("hub","getrobots",$PDS,10);
-        pdsDelete($PDS);
-        if($RC == NIME_OK) {
-            my $ROBOTS_PDS = Nimbus::PDS->new($NMS_RES);
-            for( my $count = 0; my $ROBOTNFO = $ROBOTS_PDS->getTable("robotlist",PDS_PDS,$count); $count++) {
-                my $ROBOT = new perluim::robot($ROBOTNFO);
-                push(@RobotsList,$ROBOT);
-            }
-            last;
-        }
-        else {
-            $self->doSleep(2);
-        }
-    }
-    return $RC,@RobotsList;
-}
-
 1;
