@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-package perluim::distsrvjob;
+package perluim::dtsrvjob;
 
 sub new {
     my ($class,$pds) = @_;
