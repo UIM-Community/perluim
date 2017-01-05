@@ -8,9 +8,7 @@ This framework has been created to help developer to work with the Perl SDK of C
 # Probes 
 
 ##### R2.0
-- Selfmonitoring    - [Link](https://github.com/fraxken/selfmonitoring)
 - Archive_cleaner   - [Link](https://github.com/fraxken/archive_cleaner)
-- Robots_checker    - [Link](https://github.com/fraxken/robots_checker/tree/master)
 - Alarms_management - [Link](https://github.com/fraxken/Alarms_management)
 - Netconnect_ha     - [Link](https://github.com/fraxken/netconnect_ha)
 - Archive_inventory - [Link](https://github.com/fraxken/archive_inventory)
@@ -18,9 +16,11 @@ This framework has been created to help developer to work with the Perl SDK of C
 
 > Warning : Use the release R2.0, dont use latest commits that correspond to the release 3.0
 
-##### R3.0 (pre-release) 
+##### R3.0 
 
 - Keyreplacer - [Link](https://github.com/fraxken/keyreplacer)
+- Robots_checker    - [Link](https://github.com/fraxken/robots_checker/tree/master)
+- Selfmonitoring    - [Link](https://github.com/fraxken/selfmonitoring)
 
 # Probes comming 
 
@@ -33,6 +33,7 @@ This framework has been created to help developer to work with the Perl SDK of C
 ```perl
 use perluim::main;
 use perluim::log;
+use perluim::utils;
 
 my ($Console,$ScriptExecutionTime,$SDK,Execution_Date);
 
@@ -45,8 +46,8 @@ $Console->print("Instanciating perluim framework!",3);
 $SDK = new perluim::main("DOMAIN-PROD");
 $SDK->setLog($Console);
 $Console->print("Create output directory.");
-$Execution_Date = $SDK->getDate();
-$SDK->createDirectory("output/$Execution_Date");
+$Execution_Date = perluim::utils::getDate();
+perluim::utils::createDirectory("output/$Execution_Date");
 ```
 
 ### Get robots or hubs 
@@ -55,7 +56,7 @@ my ($RC,@Hubs) = $SDK->getArrayHubs();
 if($RC == NIME_OK) {
     foreach my $hub (@Hubs) {
         # Hub is perluim:hub class
-        my @Robots $hub->getArrayRobots();
+        my ($RC_Robot,@Robots) = $hub->robotsArray();
     }
 }
 
