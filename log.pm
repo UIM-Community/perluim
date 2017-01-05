@@ -12,7 +12,8 @@ our %Log_level = (
 	2 => "[WARNING] ",
 	3 => "[INFO]    ",
 	4 => "[DEBUG]   ",
-	5 => "          "
+	5 => "          ",
+	6 => "[SUCCESS] "
 );
 
 sub new {
