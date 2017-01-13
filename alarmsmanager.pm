@@ -31,7 +31,7 @@ sub call {
             $finalMsg =~ s/\$\Q$_/$hashRef->{$_}/g;
         }
     }
-    my ($rc,$alarmid) = nimAlarm($self->{severity},$finalMsg,$self->{subsystem},undef);
+    my ($rc,$alarmid) = nimAlarm($self->{severity},$finalMsg,$self->{subsystem},$hashRef->{supdef} || undef,$hashRef->{source} || undef);
     return $rc,$alarmid;
 }
 
