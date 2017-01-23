@@ -6,6 +6,7 @@ use lib "D:/apps/Nimsoft/Perl64/lib/Win32API";
 use Nimbus::API;
 use Nimbus::PDS;
 use Nimbus::CFG;
+use perluim::utils;
 
 use Data::Dumper;
 
@@ -21,7 +22,7 @@ sub new {
     return bless($this,ref($class) || $class);
 }
 
-sub call {
+sub getMessage {
     my ($self,$hashRef) = @_;
     my $finalMsg = $self->{message};
     my $CopyMsg = $self->{message};
@@ -31,11 +32,31 @@ sub call {
             $finalMsg =~ s/\$\Q$_/$hashRef->{$_}/g;
         }
     }
-    my ($rc,$alarmid) = nimAlarm($self->{severity},$finalMsg,$self->{subsystem},$hashRef->{supdef} || undef,$hashRef->{source} || undef);
+    return $finalMsg;
+}
+
+sub call {
+    my ($self,$hashRef) = @_;
+    my $finalMsg = $self->getMessage($hashRef);
+    my ($rc,$alarmid) = nimAlarm($self->{severity},$finalMsg,$self->{subsystem},undef);
     return $rc,$alarmid;
 }
 
-
+sub customCall {
+    my ($self,$robot,$alarmHashRef) = @_;
+    if(not defined $alarmHashRef->{severity}) {
+        $alarmHashRef->{severity} = $self->{severity}
+    }
+    if(not defined $alarmHashRef->{subsystem}) {
+        $alarmHashRef->{subsystem} = $self->{subsystem}
+    }
+    if(not defined $alarmHashRef->{message}) {
+        $alarmHashRef->{message} = $self->getMessage($alarmHashRef);
+    }
+    my ($PDS,$alarmid) = perluim::utils::generateAlarm('alarm',$alarmHashRef);
+    my ($rc_alarm,$res) = nimRequest("$robot->{name}",48001,"post_raw",$PDS);
+    return $rc_alarm,$alarmid;
+}
 
 package perluim::alarmsmanager;
 
