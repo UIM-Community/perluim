@@ -140,7 +140,7 @@ sub postRaw {
         $alarmHashRef->{robot} = $robot->{name};
     }
 
-    my ($PDS,$alarmid) = perluim::utils::generateAlarm('alarm',$alarmHashRef);
+    my ($PDS,$alarmid) = generateAlarm('alarm',$alarmHashRef);
     my ($rc_alarm,$res) = nimRequest("$alarmHashRef->{robot}",48001,"post_raw",$PDS);
     return $rc_alarm,$alarmid;
 }
