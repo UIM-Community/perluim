@@ -10,7 +10,7 @@ use Nimbus::Session;
 use Nimbus::CFG;
 use Nimbus::PDS;
 
-our @EXPORT_OK = qw(minIndex getTerminalInput getDate rndStr createDirectory doSleep generateAlarm nimId);
+our @EXPORT_OK = qw(minIndex getTerminalInput getDate rndStr createDirectory doSleep generateAlarm nimId postRaw);
 
 sub doSleep {
     my ($self,$sleepTime) = @_;
@@ -105,3 +105,42 @@ sub generateAlarm {
 
     return ($PDS,$nimid);
 }   
+
+sub postRaw {
+    my ($alarmHashRef) = @_;
+    if(not defined $alarmHashRef->{robot}) {
+        return undef,undef;
+    }
+    else {
+        my $robot = $alarmHashRef->{robot}; 
+        if(not defined $alarmHashRef->{origin}) {
+            $alarmHashRef->{origin} = $robot->{origin};
+        }
+        
+        if(not defined $alarmHashRef->{usertag1}) {
+            $alarmHashRef->{usertag1} = $robot->{os_user1};
+        }
+
+        if(not defined $alarmHashRef->{usertag2}) {
+            $alarmHashRef->{usertag2} = $robot->{os_user2};
+        }
+
+        if(not defined $alarmHashRef->{dev_id}) {
+            $alarmHashRef->{dev_id} = $robot->{device_id};
+        }
+
+        if(not defined $alarmHashRef->{met_id}) {
+            $alarmHashRef->{met_id} = $robot->{metric_id};
+        }
+
+        if(not defined $alarmHashRef->{source}) {
+            $alarmHashRef->{source} = $robot->{ip};
+        }
+
+        $alarmHashRef->{robot} = $robot->{name};
+    }
+
+    my ($PDS,$alarmid) = perluim::utils::generateAlarm('alarm',$alarmHashRef);
+    my ($rc_alarm,$res) = nimRequest("$alarmHashRef->{robot}",48001,"post_raw",$PDS);
+    return $rc_alarm,$alarmid;
+}
