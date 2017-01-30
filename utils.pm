@@ -10,7 +10,7 @@ use Nimbus::Session;
 use Nimbus::CFG;
 use Nimbus::PDS;
 
-our @EXPORT_OK = qw(minIndex getTerminalInput getDate rndStr createDirectory doSleep generateAlarm nimId postRaw);
+our @EXPORT_OK = qw(minIndex getTerminalInput getDate rndStr createDirectory doSleep generateAlarm nimId postRaw strBeginWith);
 
 sub doSleep {
     my ($self,$sleepTime) = @_;
@@ -19,6 +19,9 @@ sub doSleep {
     }
 }
 
+sub strBeginWith {
+    return substr($_[0], 0, length($_[1])) eq $_[1];
+}
 
 sub createDirectory {
     my ($path) = @_;
