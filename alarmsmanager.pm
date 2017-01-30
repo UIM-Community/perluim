@@ -17,6 +17,7 @@ sub new {
         message => @$arr[0],
         severity => @$arr[2] || 1,
         token => @$arr[1] || undef,
+        supkey => undef,
         subsystem => @$arr[3] || "1."
     };
     return bless($this,ref($class) || $class);
@@ -38,12 +39,15 @@ sub getMessage {
 sub call {
     my ($self,$hashRef) = @_;
     my $finalMsg = $self->getMessage($hashRef);
-    my ($rc,$alarmid) = nimAlarm($self->{severity},$finalMsg,$self->{subsystem},undef);
+    my ($rc,$alarmid) = nimAlarm($self->{severity},$finalMsg,$self->{subsystem},$self->{supkey});
     return $rc,$alarmid;
 }
 
 sub customCall {
-    my ($self,$alarmHashRef) = @_;
+    my ($self,$alarmHashRef,$type) = @_;
+    if(not defined $type) {
+        $type = "alarm";
+    }
     if(not defined $alarmHashRef->{robot}) {
         return undef,undef;
     }
@@ -88,7 +92,7 @@ sub customCall {
         $alarmHashRef->{message} = $self->getMessage($alarmHashRef);
     }
 
-    my ($PDS,$alarmid) = perluim::utils::generateAlarm('alarm',$alarmHashRef);
+    my ($PDS,$alarmid) = perluim::utils::generateAlarm("$type",$alarmHashRef);
     my ($rc_alarm,$res) = nimRequest("$alarmHashRef->{robot}",48001,"post_raw",$PDS);
     return $rc_alarm,$alarmid;
 }
