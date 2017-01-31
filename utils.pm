@@ -97,7 +97,7 @@ sub generateAlarm {
     pdsPut_PCH($PDS,"domain",$hashRef->{domain} || "");
 
     my $AlarmPDS = pdsCreate();
-    pdsPut_INT($AlarmPDS,"level",$hashRef->{severity} || 1);
+    pdsPut_INT($AlarmPDS,"level",$hashRef->{severity} || 0);
     pdsPut_PCH($AlarmPDS,"message",$hashRef->{message});
     pdsPut_PCH($AlarmPDS,"subsys",$hashRef->{subsystem} || 1);
     if(defined $hashRef->{token}) {
