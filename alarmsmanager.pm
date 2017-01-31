@@ -6,6 +6,7 @@ use lib "D:/apps/Nimsoft/Perl64/lib/Win32API";
 use Nimbus::API;
 use Nimbus::PDS;
 use Nimbus::CFG;
+use perluim::utils;
 
 use Data::Dumper;
 
@@ -16,12 +17,13 @@ sub new {
         message => @$arr[0],
         severity => @$arr[2] || 1,
         token => @$arr[1] || undef,
+        supkey => undef,
         subsystem => @$arr[3] || "1."
     };
     return bless($this,ref($class) || $class);
 }
 
-sub call {
+sub getMessage {
     my ($self,$hashRef) = @_;
     my $finalMsg = $self->{message};
     my $CopyMsg = $self->{message};
@@ -31,11 +33,69 @@ sub call {
             $finalMsg =~ s/\$\Q$_/$hashRef->{$_}/g;
         }
     }
-    my ($rc,$alarmid) = nimAlarm($self->{severity},$finalMsg,$self->{subsystem},$hashRef->{supdef} || undef,$hashRef->{source} || undef);
+    return $finalMsg;
+}
+
+sub call {
+    my ($self,$hashRef) = @_;
+    my $finalMsg = $self->getMessage($hashRef);
+    my ($rc,$alarmid) = nimAlarm($self->{severity},$finalMsg,$self->{subsystem},$self->{supkey});
     return $rc,$alarmid;
 }
 
+sub customCall {
+    my ($self,$alarmHashRef,$type) = @_;
+    if(not defined $type) {
+        $type = "alarm";
+    }
+    if(not defined $alarmHashRef->{robot}) {
+        return undef,undef;
+    }
+    else {
+        my $robot = $alarmHashRef->{robot}; 
+        if(not defined $alarmHashRef->{origin}) {
+            $alarmHashRef->{origin} = $robot->{origin};
+        }
+        
+        if(not defined $alarmHashRef->{usertag1}) {
+            $alarmHashRef->{usertag1} = $robot->{os_user1};
+        }
 
+        if(not defined $alarmHashRef->{usertag2}) {
+            $alarmHashRef->{usertag2} = $robot->{os_user2};
+        }
+
+        if(not defined $alarmHashRef->{dev_id}) {
+            $alarmHashRef->{dev_id} = $robot->{device_id};
+        }
+
+        if(not defined $alarmHashRef->{met_id}) {
+            $alarmHashRef->{met_id} = $robot->{metric_id};
+        }
+
+        if(not defined $alarmHashRef->{source}) {
+            $alarmHashRef->{source} = $robot->{ip};
+        }
+
+        $alarmHashRef->{robot} = $robot->{name};
+    }
+
+    if(not defined $alarmHashRef->{severity}) {
+        $alarmHashRef->{severity} = $self->{severity}
+    }
+
+    if(not defined $alarmHashRef->{subsystem}) {
+        $alarmHashRef->{subsystem} = $self->{subsystem}
+    }
+
+    if(not defined $alarmHashRef->{message}) {
+        $alarmHashRef->{message} = $self->getMessage($alarmHashRef);
+    }
+
+    my ($PDS,$alarmid) = perluim::utils::generateAlarm("$type",$alarmHashRef);
+    my ($rc_alarm,$res) = nimRequest("$alarmHashRef->{robot}",48001,"post_raw",$PDS);
+    return $rc_alarm,$alarmid;
+}
 
 package perluim::alarmsmanager;
 
