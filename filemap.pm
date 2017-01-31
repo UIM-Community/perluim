@@ -19,7 +19,7 @@ sub new {
         die "Invalid manifest file $location";
     }
     if(not -f $location) {
-        open my $fh, '>', '$location';
+        open my $fh, '>', "$location";
         close $fh;
     }
     $this->{file} = cfgOpen($location,0);
