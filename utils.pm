@@ -85,7 +85,7 @@ sub generateAlarm {
     #pdsPut_PCH($PDS,"md5sum","");
     pdsPut_PCH($PDS,"user_tag_1",$hashRef->{usertag1} || "");
     pdsPut_PCH($PDS,"user_tag_2",$hashRef->{usertag2} || "");
-    pdsPut_PCH($PDS,"source",$hashRef->{source});
+    pdsPut_PCH($PDS,"source",$hashRef->{source} || $hashRef->{robot} || "");
     pdsPut_PCH($PDS,"robot",$hashRef->{robot} || "");
     pdsPut_PCH($PDS,"prid",$hashRef->{probe} || "");
     pdsPut_INT($PDS,"pri",$hashRef->{severity} || 1);
