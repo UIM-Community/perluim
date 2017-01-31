@@ -48,10 +48,8 @@ sub customCall {
     if(not defined $type) {
         $type = "alarm";
     }
-    if(not defined $alarmHashRef->{robot}) {
-        return undef,undef;
-    }
-    else {
+    
+    if(defined $alarmHashRef->{robot}) {
         my $robot = $alarmHashRef->{robot}; 
         if(not defined $alarmHashRef->{origin}) {
             $alarmHashRef->{origin} = $robot->{origin};
@@ -78,6 +76,10 @@ sub customCall {
         }
 
         $alarmHashRef->{robot} = $robot->{name};
+    }
+
+    if(defined $alarmHashRef->{robotname}) {
+        $alarmHashRef->{robot} = $robot->{robotname};
     }
 
     if(not defined $alarmHashRef->{severity}) {
