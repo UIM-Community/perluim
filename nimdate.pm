@@ -7,13 +7,6 @@ use Time::Piece;
 # Namespace
 package perluim::nimdate;
 
-# Nimsoft librairies !
-use lib "D:/apps/Nimsoft/perllib";
-use lib "D:/apps/Nimsoft/Perl64/lib/Win32API";
-use Nimbus::API;
-use Nimbus::PDS;
-use Nimbus::CFG;
-
 sub new {
     my ($class,$dateString) = @_;
     my $this = {
