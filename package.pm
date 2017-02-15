@@ -4,13 +4,6 @@ use warnings;
 # Namespace
 package perluim::package;
 
-# Nimsoft librairies !
-use lib "D:/apps/Nimsoft/perllib";
-use lib "D:/apps/Nimsoft/Perl64/lib/Win32API";
-use Nimbus::API;
-use Nimbus::PDS;
-use Nimbus::CFG;
-
 sub new {
     my ($class,$o) = @_;
     my $this = {
