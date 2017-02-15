@@ -2,7 +2,7 @@ package perluim::log;
 use strict;
 use warnings;
 use File::Copy;
-use File::Stat;
+use File::stat;
 use File::Path 'rmtree';
 use IO::Handle;
 
