@@ -1,10 +1,8 @@
 package perluim::utils;
+
 use strict;
 use warnings;
 use Exporter qw(import);
-
-use lib "D:/apps/Nimsoft/perllib";
-use lib "D:/apps/Nimsoft/Perl64/lib/Win32API";
 use Nimbus::API;
 use Nimbus::Session;
 use Nimbus::CFG;
