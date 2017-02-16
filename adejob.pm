@@ -1,13 +1,7 @@
-#
-# PERLUIM ADEJOB.PM
-# ADE Job class.
-#
+package perluim::adejob;
 
 use strict;
 use warnings;
-
-package perluim::adejob;
-
 use Nimbus::API;
 use Nimbus::PDS;
 
