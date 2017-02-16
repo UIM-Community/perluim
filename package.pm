@@ -1,8 +1,7 @@
+package perluim::package;
+
 use strict;
 use warnings;
-
-# Namespace
-package perluim::package;
 
 sub new {
     my ($class,$o) = @_;
