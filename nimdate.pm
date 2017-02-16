@@ -1,11 +1,9 @@
+package perluim::nimdate;
+
 use strict;
 use warnings;
-use Data::Dumper;
 use 5.010;
 use Time::Piece;
-
-# Namespace
-package perluim::nimdate;
 
 sub new {
     my ($class,$dateString) = @_;
