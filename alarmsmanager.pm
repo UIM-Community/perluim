@@ -1,14 +1,9 @@
 package perluim::alarmstask;
 
-# Nimsoft librairies !
-use lib "D:/apps/Nimsoft/perllib";
-use lib "D:/apps/Nimsoft/Perl64/lib/Win32API";
 use Nimbus::API;
 use Nimbus::PDS;
 use Nimbus::CFG;
 use perluim::utils;
-
-use Data::Dumper;
 
 sub new {
     my ($class,$name,$arr) = @_;
