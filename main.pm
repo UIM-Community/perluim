@@ -1,10 +1,7 @@
-use strict;
-use warnings;
 package perluim::main;
 
-# Nimsoft packages
-use lib "D:/apps/Nimsoft/perllib";
-use lib "D:/apps/Nimsoft/Perl64/lib/Win32API";
+use strict;
+use warnings;
 use Nimbus::API;
 use Nimbus::CFG;
 use Nimbus::PDS;
@@ -15,9 +12,6 @@ use perluim::robot;
 
 use Term::ANSIColor qw(:constants);
 use Data::Dumper;
-use HTTP::Request;
-use LWP::UserAgent;
-use XML::Simple;
 $Data::Dumper::Indent = 1;
 
 sub new {
