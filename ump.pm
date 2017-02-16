@@ -1,9 +1,9 @@
+package perluim::ump;
+
 use strict;
 use warnings;
 use HTTP::Request;
 use LWP::UserAgent;
-
-package perluim::ump;
 
 sub new {
     my ($class,@ump_servers) = @_;
