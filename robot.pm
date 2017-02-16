@@ -1,11 +1,7 @@
-use strict;
-use warnings;
-
 package perluim::robot;
 
-# Nimsoft librairies !
-use lib "D:/apps/Nimsoft/perllib";
-use lib "D:/apps/Nimsoft/Perl64/lib/Win32API";
+use strict;
+use warnings;
 use Nimbus::API;
 use Nimbus::PDS;
 use Nimbus::CFG;
