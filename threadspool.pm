@@ -1,10 +1,10 @@
+package perluim::threadspool;
+
 use strict;
 use warnings;
 use threads;
 use Thread::Queue;
 use Data::Dumper;
-
-package perluim::threadspool;
 
 sub new {
     my ($class,$cbRef,$threadsNumber,$maxRow) = @_;
