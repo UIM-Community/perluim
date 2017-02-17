@@ -16,9 +16,9 @@ Find the [Starter guide](https://github.com/fraxken/perluim/wiki/Starter-guide) 
 - Archive_inventory - [Link](https://github.com/fraxken/archive_inventory)
 - ump_management    - [Link](https://github.com/fraxken/ump_management) (Rework of UMP_ha 3). 
 
-> Warning : Use the release R2.0, dont use latest commits that correspond to the release 3.0
+> Warning : Use the release R2.0, dont use latest commits that correspond to the release 4.1
 
-##### Release 3 probes
+##### Release 3+ probes
 
 - Keyreplacer - [Link](https://github.com/fraxken/keyreplacer)
 - Robots_checker    - [Link](https://github.com/fraxken/robots_checker/tree/master)
@@ -33,3 +33,8 @@ Find the [Starter guide](https://github.com/fraxken/perluim/wiki/Starter-guide) 
 - Better alarms management (Alarmsmanager, filemap, utils::generateAlarms)
 
 > Feel free to pull-request new features.
+
+# Roadmap r4.2
+
+- Refactor log.pm constructor (double constructor with Hash params) 
+- Add missing .pm class from documentation.
