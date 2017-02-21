@@ -1,4 +1,4 @@
-package perluim::log;
+package perluim::logger;
 use strict;
 use warnings;
 use File::Copy;
@@ -6,7 +6,7 @@ use File::stat;
 use File::Path 'rmtree';
 use IO::Handle;
 
-our %Log_level = (
+our %loglevel_label = (
 	0 => "[CRITICAL]",
 	1 => "[ERROR]   ",
 	2 => "[WARNING] ",
@@ -16,14 +16,25 @@ our %Log_level = (
 	6 => "[SUCCESS] "
 );
 
+use constant {
+	NimFATAL => 0,
+	NimERROR => 1,
+	NimWARN  => 2,
+	NimINFO	 => 3,
+	NimDEBUG => 4,
+	NimEmpty => 5,
+	NimSUCCESS => 6
+};
+
 sub new {
-    my ($class,$logfile,$loglevel,$logsize,$logrewrite) = @_;
+    my ($class,$hashRef) = @_;
     my $this = {
-		logfile => $logfile,
-		loglevel => $loglevel || 3,
-		logsize => $logsize || 0,
-		logrewrite => $logrewrite || 'yes',
-		fh => undef
+		logfile => $hashRef->{file},
+		loglevel => $hashRef->{level} || 3,
+		logsize => $hashRef->{size} || 0,
+		logrewrite => $hashRef->{overwrite} || 'yes',
+		_time => time(),
+		_fh => undef
     };
     my $blessed = bless($this,ref($class) || $class);
 	my $rV = $blessed->{logrewrite} eq "yes" ? ">" : ">>";
@@ -34,8 +45,8 @@ sub new {
 			$rV = ">";
 		}
 	}
-	open ($this->{fh},"$rV","$logfile");
-	$blessed->print("New console class created with logfile as => $logfile!",5);
+	open ($this->{_fh},"$rV","$hashRef->{file}");
+	$blessed->log(5,"New console class created with logfile as => $hashRef->{file}!");
 	return $blessed;
 }
 
@@ -46,10 +57,10 @@ sub setLevel {
 
 sub close {
 	my ($self) = @_;
-	close($self->{fh});
+	close($self->{_fh});
 }
 
-sub dateLog {
+sub getDate {
 	my @months = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
 	my @days = qw(Sun Mon Tue Wed Thu Fri Sat Sun);
 	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
@@ -57,16 +68,16 @@ sub dateLog {
 	return "$months[$mon] $timetwoDigits";
 }
 
-sub print {
-	my ($self,$logmsg,$loglevel) = @_;
+sub log {
+	my ($self,$loglevel,$logmsg) = @_;
 	if(not defined($loglevel)) {
 		$loglevel = 3;
 	}
 	if($loglevel <= $self->{loglevel} || $loglevel == 5 || $loglevel == 4) {
-		my $date = dateLog();
-		my $filehandler = $self->{fh};
-		print $filehandler "$date $Log_level{$loglevel} - $logmsg\n";
-		print "$date $Log_level{$loglevel} - $logmsg\n";
+		my $date = getDate();
+		my $filehandler = $self->{_fh};
+		print $filehandler "$date $loglevel_label{$loglevel} - $logmsg\n";
+		print "$date $loglevel_label{$loglevel} - $logmsg\n";
 		$filehandler->autoflush;
 	}
 }
@@ -84,18 +95,18 @@ sub cleanDirectory {
 	}
 
 	foreach(@removeDirectory) {
-		$self->print("Remove old directory $directory => $_",2);
+		$self->log(2,"Remove old directory $directory => $_");
 		rmtree("$directory/$_");
 	}
 }
 
 sub finalTime {
-	my ($self,$timer) = @_;
-	my $FINAL_TIME  = sprintf("%.2f", time() - $timer);
+	my ($self) = @_;
+	my $FINAL_TIME  = sprintf("%.2f", time() - $self->{_time});
     my $Minute      = sprintf("%.2f", $FINAL_TIME / 60);
-	$self->print('---------------------------------------',5);
-    $self->print("Execution time = $FINAL_TIME second(s) [$Minute minutes]!",5);
-	$self->print('---------------------------------------',5);
+	$self->log(5,'---------------------------------------');
+    $self->log(5,"Execution time = $FINAL_TIME second(s) [$Minute minutes]!");
+	$self->log(5,'---------------------------------------');
 }
 
 sub copyTo {
