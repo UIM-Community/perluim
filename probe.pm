@@ -40,7 +40,7 @@ sub new {
 }
 
 sub getCfg {
-    my ($self,$filepath) = @_;
+    my ($self,$filepath,$customName) = @_;
     my $directory   = "probes/$self->{group}/$self->{name}/";
 
     if($self->{name} eq "hub") {
@@ -70,7 +70,8 @@ sub getCfg {
     if($RC == NIME_OK) {
         my $CFG_Handler;
 
-        unless(open($CFG_Handler,">>","$filepath/$self->{name}.cfg")) {
+        my $cfg_name = $customName || $self->{name};
+        unless(open($CFG_Handler,">>","$filepath/$cfg_name.cfg")) {
             return 1;
         }
         my @ARR_CFG_Config = Nimbus::PDS->new($RES)->asHash();
