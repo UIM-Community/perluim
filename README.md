@@ -26,6 +26,7 @@ Find the [Starter guide](https://github.com/fraxken/perluim/wiki/Starter-guide) 
 - Keyreplacer - [Link](https://github.com/fraxken/keyreplacer)
 - Robots_checker    - [Link](https://github.com/fraxken/robots_checker/tree/master)
 - Selfmonitoring    - [Link](https://github.com/fraxken/selfmonitoring)
+- Netconnect_ha     - [Link](https://github.com/fraxken/netconnect_ha)
 
 > **Warning** Some probes have to be updated for the latest releases of this framework.
 
