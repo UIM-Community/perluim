@@ -70,7 +70,7 @@ sub getCfg {
     if($RC == NIME_OK) {
         my $CFG_Handler;
 
-        unless(open($CFG_Handler,">>","$filepath/$self->{name}.cfg")) {
+        unless(open($CFG_Handler,">","$filepath/$self->{name}.cfg")) {
             return 1;
         }
         my @ARR_CFG_Config = Nimbus::PDS->new($RES)->asHash();
