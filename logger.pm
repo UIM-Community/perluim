@@ -91,7 +91,9 @@ sub cleanDirectory {
 	foreach my $file (@directory) {
 		next if ($file =~ m/^\./);
 		my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat("$directory/$file");
-		push(@removeDirectory,$file) if(time() - $ctime > $maxAge);
+		if(defined $ctime) {
+			push(@removeDirectory,$file) if(time() - $ctime > $maxAge);
+		}
 	}
 
 	foreach(@removeDirectory) {
