@@ -23,10 +23,10 @@ sub new {
 }
 
 sub getLocalRobot {
-    my ($self) = @_;
+    my ($self,$addr) = @_;
 
     my $PDS = pdsCreate();
-    my ($RC,$NMS_RES) = nimNamedRequest("controller","get_info",$PDS,1);
+    my ($RC,$NMS_RES) = nimNamedRequest($addr || "controller","get_info",$PDS,1);
     pdsDelete($PDS);
 
     if($RC == NIME_OK) {
