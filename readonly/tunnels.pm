@@ -1,6 +1,7 @@
+package perluim::readonly::tunnels;
+
 use strict;
 use warnings;
-package perluim::tunnels;
 
 sub new {
     my ($class,$o) = @_;

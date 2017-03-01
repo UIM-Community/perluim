@@ -1,4 +1,4 @@
-package perluim::adejob;
+package perluim::readyonly::adejob;
 
 use strict;
 use warnings;

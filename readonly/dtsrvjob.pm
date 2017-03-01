@@ -1,4 +1,4 @@
-package perluim::dtsrvjob;
+package perluim::readonly::dtsrvjob;
 
 use strict;
 use warnings;

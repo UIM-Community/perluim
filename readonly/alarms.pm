@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-package perluim::alarms;
+package perluim::readonly::alarms;
 
 sub new {
     my ($class,$o) = @_;

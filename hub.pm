@@ -11,7 +11,7 @@ use perluim::robot;
 use perluim::package;
 use perluim::archive;
 use perluim::probe;
-use perluim::queue;
+use perluim::readonly::queue;
 
 sub new {
     my ($class,$o) = @_;

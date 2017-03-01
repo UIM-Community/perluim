@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-package perluim::queue;
+package perluim::readonly::queue;
 
 sub new {
     my ($class,$o) = @_;
