@@ -61,7 +61,8 @@ sub truncate {
 		my $fileSize = (stat $self->{logfile})[7];
 		if($fileSize >= $self->{logsize}) {
 			copy("$self->{logfile}","_$self->{logfile}") or warn "Failed to copy logfile!";
-			$rV = ">";
+			close($self->{_fh});
+			open ($self->{_fh},">","$self->{logfile}");
 		}
 	}
 }
