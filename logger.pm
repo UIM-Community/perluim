@@ -55,6 +55,17 @@ sub setLevel {
 	$self->{loglevel} = $level || 5;
 }
 
+sub truncate {
+	my ($self) = @_;
+	if($self->{logsize} != 0) {
+		my $fileSize = (stat $self->{logfile})[7];
+		if($fileSize >= $self->{logsize}) {
+			copy("$self->{logfile}","_$self->{logfile}") or warn "Failed to copy logfile!";
+			$rV = ">";
+		}
+	}
+}
+
 sub close {
 	my ($self) = @_;
 	close($self->{_fh});
