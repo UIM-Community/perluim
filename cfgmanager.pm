@@ -8,24 +8,24 @@ use Nimbus::CFG;
 
 sub new {
     my ($class,$filePath,$readOnly) = @_;
-    my $cfg = cfgOpen($filePath,$readOnly);
+    my $cfg = cfgOpen($filePath,$readOnly || 0);
     my $this = {
         _closed => 0,
         _inner => $cfg,
-        readyOnly => $readyOnly || 0
+        readyOnly => $readOnly || 0
     };
     return bless($this,ref($class) || $class);
 }
 
 sub has {
     my ($self,$section,$key) = @_;
-    my $value = cfgKeyRead($section,$key || "");
+    my $value = cfgKeyRead($self->{_inner},$section,$key || "");
     return defined $value ? 1 : 0; 
 }
 
 sub read {
     my ($self,$section,$key) = @_;
-    my $value = cfgKeyRead($section,$key || "");
+    my $value = cfgKeyRead($self->{_inner},$section,$key || "");
     return $value;
 }
 
@@ -47,7 +47,7 @@ sub hashKeys {
 sub arrayKeys {
     my ($self,$section,$arrayRef) = @_;
     foreach my $key ($arrayRef) {
-        cfgKeyWrite($self->{_inner},$section,$key,$hashRef->{$key} || "");
+        cfgKeyWrite($self->{_inner},$section,$key,@$arrayRef[$key] || "");
     }
 }
  
@@ -93,12 +93,12 @@ sub save {
 }
 
 sub open {
-    my ($self,$path,$readyOnly) = @_;
+    my ($self,$path,$readOnly) = @_;
     if($self->{_closed} == 0) {
         $self->save();
         $self->close();
     }
-    $self->{_inner}  = cfgOpen($path,$readyOnly || $self->{readOnly},undef);
+    $self->{_inner}  = cfgOpen($path,$readOnly || $self->{readOnly});
     $self->{_closed} = 0;
 }
 
@@ -107,3 +107,5 @@ sub close {
     cfgClose($self->{_inner});
     $self->{_closed} = 1;
 }
+
+1;
