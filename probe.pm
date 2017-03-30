@@ -127,8 +127,8 @@ sub setKey {
     my $PDS_args = pdsCreate();
     pdsPut_PCH ($PDS_args,"name","$self->{name}");
     pdsPut_PCH ($PDS_args,"section","$section");
-    pdsPut_PCH ($PDS_args,"key","$key");
-    pdsPut_PCH ($PDS_args,"value","$value");
+    pdsPut_PCH ($PDS_args,"key","$key") if defined $key;
+    pdsPut_PCH ($PDS_args,"value","$value") if defined $value;
     pdsPut_PCH ($PDS_args,"robot","1");
 
     my ($RC, $O) = nimNamedRequest("$self->{addr}/controller", "probe_config_set", $PDS_args,3);
@@ -143,8 +143,8 @@ sub local_setKey {
     my $PDS_args = pdsCreate();
     pdsPut_PCH ($PDS_args,"name","$self->{name}");
     pdsPut_PCH ($PDS_args,"section","$section");
-    pdsPut_PCH ($PDS_args,"key","$key");
-    pdsPut_PCH ($PDS_args,"value","$value");
+    pdsPut_PCH ($PDS_args,"key","$key") if defined $key;
+    pdsPut_PCH ($PDS_args,"value","$value") if defined $value;
     pdsPut_PCH ($PDS_args,"robot","1");
 
     my ($RC, $O) = nimRequest("$self->{robotname}",48000, "probe_config_set", $PDS_args,3);
