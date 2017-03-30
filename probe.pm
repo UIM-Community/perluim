@@ -11,7 +11,7 @@ sub new {
     my @addrArray = split("/",$addr);
     my $this = {
         name            => $o->{$name}{"name"},
-        addr            => $addr,
+        addr            => $addrArray[0]."/".$addrArray[1]."/".$addrArray[2]."/".$addrArray[3],
         robotname       => $addrArray[3],
         description     => $o->{$name}{"description"}  || "",
         group           => lc $o->{$name}{"group"}  || "",
@@ -203,5 +203,88 @@ sub local_getKey {
     return $RC,undef;
 }
 
+sub restart {
+    my ($self) = @_;
+    my $PDS = pdsCreate();
+	my $RC = nimNamedRequest( "$self->{addr}/$self->{name}", "_restart",$PDS);
+    pdsDelete($PDS);
+	return $RC;
+}
+
+sub local_restart {
+    my ($self) = @_;
+	my $RC = nimRequest( "$self->{robotname}",$self->{port}, "_restart");
+	return $RC;
+}
+
+sub deactivate {
+	my ($self,) = @_;
+
+	my $PDS = pdsCreate();
+	pdsPut_PCH($PDS,"name",$self->{name});
+	pdsPut_INT($PDS,"noforce",1);
+	my ($RC,$OBJ) = nimNamedRequest( "$self->{addr}/controller", "probe_deactivate",$PDS,5);
+    pdsDelete($PDS);
+
+	return $RC;
+}
+
+sub local_deactivate {
+	my ($self) = @_;
+
+	my $PDS = pdsCreate();
+	pdsPut_PCH($PDS,"name",$self->{name});
+	pdsPut_INT($PDS,"noforce",1);
+	my ($RC,$OBJ) = nimRequest( "$self->{robotname}",48000, "probe_deactivate",$PDS,5);
+    pdsDelete($PDS);
+
+	return $RC;
+}
+
+sub remove {
+	my ($self) = @_;
+
+	my $args = pdsCreate();
+    pdsPut_PCH($args, "package", $self->{pkg_name});
+    pdsPut_PCH($args, "probe", $self->{name});
+    my ($RC, $RES) = nimNamedRequest("$self->{addr}/controller", "inst_pkg_remove", $args, 10);
+    pdsDelete($args);
+
+	return $RC;
+}
+
+sub local_remove {
+	my ($self) = @_;
+
+	my $args = pdsCreate();
+    pdsPut_PCH($args, "package", $self->{pkg_name});
+    pdsPut_PCH($args, "probe", $self->{name});
+    my ($RC, $RES) = nimRequest("$self->{robotname}",48000, "inst_pkg_remove", $args, 10);
+    pdsDelete($args);
+
+	return $RC;
+}
+
+sub activate {
+	my ($self) = @_;
+
+	my $PDS = pdsCreate();
+	pdsPut_PCH($PDS,"name",$self->{name});
+	my ($RC,$OBJ) = nimNamedRequest( "$self->{addr}/controller", "probe_activate",$PDS,5);
+    pdsDelete($PDS);
+
+	return $RC;
+}
+
+sub local_activate {
+	my ($self) = @_;
+
+	my $PDS = pdsCreate();
+	pdsPut_PCH($PDS,"name",$self->{name});
+	my ($RC,$OBJ) = nimRequest( "$self->{robotname}", 48000 , "probe_activate",$PDS);
+    pdsDelete($PDS);
+
+	return $RC;
+}
 
 1;
