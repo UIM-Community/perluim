@@ -33,6 +33,14 @@ sub set {
     }
 }
 
+sub has {
+    my ($self,$arg) = @_;
+    if(exists $self->{_inner}->{$arg}) {
+        return 1;
+    }
+    return 0;
+}
+
 sub get {
     my ($self,$identifier) = @_; 
     return $self->{_inner}->{$identifier};
