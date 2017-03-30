@@ -91,6 +91,17 @@ sub local_getPackages {
     return 1,undef;
 }
 
+sub jobRemove {
+    my ($self,$jobID) = @_;
+    my $PDS = pdsCreate();
+    if(defined $jobID) {
+        pdsPut_PCH ($PDS,"job_id",$jobID);
+    }
+    my ($RC,$NMS_RES) = nimNamedRequest("$self->{cleanAddr}/distsrv","job_remove",$PDS);
+    pdsDelete($PDS);
+    return $RC;
+}
+
 sub ade_addPackageSyncRule {
     my ($self,$pkg) = @_;
     my $PDS = pdsCreate();
