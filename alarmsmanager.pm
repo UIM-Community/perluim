@@ -90,7 +90,7 @@ sub customCall {
     }
 
     my ($PDS,$alarmid) = perluim::utils::generateAlarm("$type",$alarmHashRef);
-    my ($rc_alarm,$res) = nimRequest("$alarmHashRef->{robot}",48001,"post_raw",$PDS);
+    my ($rc_alarm,$res) = nimRequest("$alarmHashRef->{robot}",48001,"post_raw",$PDS->data);
     return $rc_alarm,$alarmid;
 }
 
