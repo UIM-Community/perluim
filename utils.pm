@@ -73,39 +73,39 @@ sub nimId {
 sub generateAlarm {
     my ($subject,$hashRef) = @_;
 
-    my $PDS = pdsCreate(); 
+    my $PDS = Nimbus::PDS->new(); 
     my $nimid = nimId();
 
-    pdsPut_PCH($PDS,"nimid",$nimid);
-    pdsPut_INT($PDS,"nimts",time());
-    pdsPut_INT($PDS,"tz_offset",-3600);
-    pdsPut_PCH($PDS,"subject","$subject");
-    #pdsPut_PCH($PDS,"md5sum","");
-    pdsPut_PCH($PDS,"user_tag_1",$hashRef->{usertag1} || "");
-    pdsPut_PCH($PDS,"user_tag_2",$hashRef->{usertag2} || "");
-    pdsPut_PCH($PDS,"source",$hashRef->{source} || $hashRef->{robot} || "");
-    pdsPut_PCH($PDS,"robot",$hashRef->{robot} || "");
-    pdsPut_PCH($PDS,"prid",$hashRef->{probe} || "");
-    pdsPut_INT($PDS,"pri",$hashRef->{severity} || 1);
-    pdsPut_PCH($PDS,"dev_id",$hashRef->{dev_id} || "");
-    pdsPut_PCH($PDS,"met_id",$hashRef->{met_id} || "");
-    pdsPut_PCH($PDS,"supp_key",$hashRef->{supp_key} || "1");
-    pdsPut_PCH($PDS,"suppression",$hashRef->{suppression} || "");
-    pdsPut_PCH($PDS,"origin",$hashRef->{origin} || "");
-    pdsPut_PCH($PDS,"domain",$hashRef->{domain} || "");
+    $PDS->string("nimid",$nimid);
+    $PDS->number("nimts",time());
+    $PDS->number("tz_offset",0);
+    $PDS->string("subject","$subject");
+    $PDS->string("md5sum","");
+    $PDS->string("user_tag_1",$hashRef->{usertag1} || "");
+    $PDS->string("user_tag_2",$hashRef->{usertag2} || "");
+    $PDS->string("source",$hashRef->{source} || $hashRef->{robot} || "");
+    $PDS->string("robot",$hashRef->{robot} || "");
+    $PDS->string("prid",$hashRef->{probe} || "");
+    $PDS->number("pri",$hashRef->{severity} || 0);
+    $PDS->string("dev_id",$hashRef->{dev_id} || "");
+    $PDS->string("met_id",$hashRef->{met_id} || "");
+    if ($hashRef->{supp_key}) { $PDS->string("supp_key",$hashRef->{supp_key}) };
+    $PDS->string("suppression",$hashRef->{suppression} || "");
+    $PDS->string("origin",$hashRef->{origin} || "");
+    $PDS->string("domain",$hashRef->{domain} || "");
 
-    my $AlarmPDS = pdsCreate();
-    pdsPut_INT($AlarmPDS,"level",$hashRef->{severity} || 0);
-    pdsPut_PCH($AlarmPDS,"message",$hashRef->{message});
-    pdsPut_PCH($AlarmPDS,"subsys",$hashRef->{subsystem} || 1);
+    my $AlarmPDS = Nimbus::PDS->new(); 
+    $AlarmPDS->number("level",$hashRef->{severity} || 0);
+    $AlarmPDS->string("message",$hashRef->{message});
+    $AlarmPDS->string("subsys",$hashRef->{subsystem} || "1.1.");
     if(defined $hashRef->{token}) {
-        pdsPut_PCH($AlarmPDS,"token",$hashRef->{token});
+        $AlarmPDS->string("token",$hashRef->{token});
     }
 
-    pdsPut_PDS($PDS,"udata",$AlarmPDS);
+    $PDS->put("udata",$AlarmPDS,PDS_PDS);
 
     return ($PDS,$nimid);
-}   
+}    
 
 sub postRaw {
     my ($alarmHashRef) = @_;
