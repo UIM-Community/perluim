@@ -6,7 +6,7 @@ sub new {
     my $this = {
         argv => \@argv,
         _inner => \%Hash,
-        allowMultiple => $allowMultiple || 1
+        allowMultiple => defined $allowMultiple ? $allowMultiple : 1
     };
     return bless($this,ref($class) || $class);
 }
@@ -16,7 +16,6 @@ sub set {
     if(not defined $identifier) {
         $identifier = $key;
     }
-    print "set begin\n";
     my $count = 0;
     my @argArr = @{ $self->{argv} };
     foreach(@argArr) {
@@ -30,6 +29,7 @@ sub set {
                 $self->{_inner}->{$identifier} = $val;
             }
         }
+        $count++;
     }
 }
 
