@@ -1,12 +1,8 @@
 package perluim::main;
 
 use strict;
-use Carp;
-use vars qw(@ISA @EXPORT $AUTOLOAD);
 require 5.010;
 require Exporter;
-require DynaLoader;
-require AutoLoader;
 
 use Nimbus::API;
 use Nimbus::CFG;
@@ -16,44 +12,12 @@ use Nimbus::PDS;
 use perluim::hub;
 use perluim::robot;
 
-
-@ISA = qw(Exporter DynaLoader);
-
-@EXPORT = qw(
-    localRequest
-);
-no warnings 'recursion';
-
-sub AUTOLOAD {
-    # This AUTOLOAD is used to 'autoload' constants from the constant()
-    # XS function.  If a constant is not found then control is passed
-    # to the AUTOLOAD in AutoLoader.
-	no strict 'refs'; 
-	
-	my $sub = $AUTOLOAD;
-    my $constname;
-    ($constname = $sub) =~ s/.*:://;
-	
-	$!=0; 
-    my ($val,$rc) = constant($constname, @_ ? $_[0] : 0);
-    if ($rc != 0) {
-		$AutoLoader::AUTOLOAD = $sub;
-		goto &AutoLoader::AUTOLOAD;
-    }
-    *$sub = sub { $val }; # Same as eval "sub $sub { $val }";
-    goto &$sub;
-}
-
 sub new {
     my ($class,$domain) = @_;
     my $this = {
         domain => $domain
     };
     return bless($this,ref($class) || $class);
-}
-
-sub localRequest {
-    print "local request started!\n";
 }
 
 sub getLocalRobot {
