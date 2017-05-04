@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-package perluim::file;
+package perluim::filereader;
 
 sub new {
     my ($class,$fileName) = @_;
